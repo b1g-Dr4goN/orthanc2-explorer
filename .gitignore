@@ -1,0 +1,9 @@
+node_modules
+dist/
+ThirdPartyDownloads/
+.DS_Store
+dist-ssr
+*.local
+.vscode/
+*~
+build

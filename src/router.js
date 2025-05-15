@@ -4,7 +4,7 @@ import SettingsLabels from './components/SettingsLabels.vue'
 import SettingsPermissions from './components/SettingsPermissions.vue'
 import StudyList from './components/StudyList.vue'
 import MySideBar from './components/MyOrthanc/MySideBar.vue'
-import MyTaskList from './components/MyOrthanc/MyTaskList.vue'
+import MyEventList from './components/MyOrthanc/MyEventList.vue'
 // import SideBar from './components/SideBar.vue'
 import NotFound from './components/NotFound.vue'
 import { baseOe2Url } from "./globalConfigurations"
@@ -42,10 +42,10 @@ export const router = createRouter({
       name: 'local-studies-list'
     },
     {
-      path: '/my-task-queue',
+      path: '/my-event-queue',
       components: {
         SideBarView: MySideBar,
-        ContentView: MyTaskList,
+        ContentView: MyEventList,
       },
     },
     {

@@ -109,7 +109,7 @@
     "legacy_ui": "Legacy UI",
     "loading_latest_studies": "Loading most recent studies",
     "local_studies": "All local Studies",
-    "my_task_queue": "My Task Queue",
+    "my_event_queue": "My Event Queue",
     "logout": "Logout",
     "modalities_in_study": "Modalities in Study",
     "modify": {

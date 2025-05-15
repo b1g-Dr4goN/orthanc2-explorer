@@ -1,37 +1,37 @@
 <template>
     <div>
-        <div class="task-detail-container">
-            <div class="task-detail-header"><strong>Task #{{ taskDetails[fieldMappings["ID"]] }} Details</strong>
+        <div class="event-detail-container">
+            <div class="event-detail-header"><strong>Event #{{ eventDetails[fieldMappings["ID"]] }} Details</strong>
             </div>
-            <div class="task-detail-content">
-                <!-- Task Details Column -->
-                <div class="task-detail-column task-details" style="width: 68%;">
-                    <div class="task-detail-row" v-for="(field, i) in fields" :key="i">
-                        <div class="task-detail-field">
+            <div class="event-detail-content">
+                <!-- Event Details Column -->
+                <div class="event-detail-column event-details" style="width: 68%;">
+                    <div class="event-detail-row" v-for="(field, i) in fields" :key="i">
+                        <div class="event-detail-field">
                             <strong>{{ field.fieldName }}:&nbsp;</strong>
-                            <div class="task-detail-label">
+                            <div class="event-detail-label">
                                 {{ field.fieldName.includes("Time") ?
-                                    formatTimestamp(taskDetails[fieldMappings?.[field.fieldName]]) :
-                                    taskDetails[fieldMappings[field.fieldName]] }}
+                                    formatTimestamp(eventDetails[fieldMappings?.[field.fieldName]]) :
+                                    eventDetails[fieldMappings[field.fieldName]] }}
                             </div>
                             <div>
                                 <CopyToClipboardButton
-                                    v-if="taskDetails[fieldMappings[field.fieldName]] && taskDetails[fieldMappings[field.fieldName]].toString().length > 0"
-                                    :valueToCopy="taskDetails[fieldMappings[field.fieldName]]" />
+                                    v-if="eventDetails[fieldMappings[field.fieldName]] && eventDetails[fieldMappings[field.fieldName]].toString().length > 0"
+                                    :valueToCopy="eventDetails[fieldMappings[field.fieldName]]" />
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Operations Column (for buttons) -->
-                <div class="task-detail-column operations" style="width: 32%;">
+                <div class="event-detail-column operations" style="width: 32%;">
                     <div class="operations-content">
-                        <!-- Here you can add buttons or any other task operations -->
+                        <!-- Here you can add buttons or any other event operations -->
                         <div class="operation-placeholder">
                             <strong>Operations</strong>
                             <!-- Placeholder for buttons or operations -->
-                            <button title="Reset Event" @click="resetTask" class="buttons bi bi-arrow-clockwise"></button>
-                            <button title="Delete Event" @click="deleteTask" class="buttons bi bi-trash"></button>
+                            <button title="Reset Event" @click="handleResetEvent(`[${this.eventDetails.id}]`)" class="buttons bi bi-arrow-repeat"></button>
+                            <button title="Delete Event" @click="handleDeleteEvent(`[${this.eventDetails.id}]`)" class="buttons bi bi-trash"></button>
                         </div>
                     </div>
                 </div>
@@ -42,21 +42,24 @@
 
 <script>
 import CopyToClipboardButton from '../CopyToClipboardButton.vue';
-import myApi from './myApi';
 
 export default {
     components: {
         CopyToClipboardButton,
     },
     props: {
-        taskDetails: {
+        eventDetails: {
             type: Object,
             required: true
         },
-        fetchData: {
+        handleDeleteEvent: {
             type: Function,
-            required: true,
-        }
+            required: true
+        },
+        handleResetEvent: {
+            type: Function,
+            required: true
+        },
     },
     data() {
         return {
@@ -89,22 +92,6 @@ export default {
         };
     },
     methods: {
-        async resetTask() {
-            try {
-                const response = await myApi.resetEventQueues([this.taskDetails.id]);
-                this.fetchData();
-            } catch (err) {
-                console.error("Failed to reset event queues: ", err);
-            }
-        },
-        async deleteTask() {
-            try {
-                const response = await myApi.deleteEventQueues([this.taskDetails.id]);
-                this.fetchData();
-            } catch (err) {
-                console.error("Failed to delete event queues: ", err);
-            }
-        },
         formatTimestamp(timestamp) {
             // Check if timestamp exists and is a valid length (14 chars)
             if (timestamp && timestamp.length === 15) {
@@ -125,22 +112,22 @@ export default {
 </script>
 
 <style scoped>
-.task-detail-content {
+.event-detail-content {
     display: flex;
     flex-direction: row;
     gap: 2rem;
 }
 
-.task-detail-column {
+.event-detail-column {
     display: flex;
     flex-direction: column;
 }
 
-.task-detail-row {
+.event-detail-row {
     margin-bottom: 0.75rem;
 }
 
-.task-detail-field {
+.event-detail-field {
     text-align: justify;
     line-height: 1.4;
     word-break: break-word;
@@ -148,18 +135,18 @@ export default {
     flex-direction: row;
 }
 
-.task-detail-label {
+.event-detail-label {
     overflow: hidden;
     text-overflow: ellipsis;
     margin-left: auto !important;
 }
 
-.task-detail-field-name {
+.event-detail-field-name {
     font-weight: bold;
     width: 50%;
 }
 
-.task-detail-field-value {
+.event-detail-field-value {
     width: 50%;
 }
 

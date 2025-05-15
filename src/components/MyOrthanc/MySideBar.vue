@@ -198,8 +198,8 @@ export default {
                     </ul>
 
                     <li class="d-flex align-items-center fix-router-link">
-                        <router-link class="router-link" to="/my-task-queue">
-                            <i class="fa fa-x-ray fa-lg menu-icon"></i>{{ $t('my_task_queue') }}
+                        <router-link class="router-link" to="/my-event-queue">
+                            <i class="fa fa-x-ray fa-lg menu-icon"></i>{{ $t('my_event_queue') }}
                             <!-- <span class="study-count ms-auto">{{ displayedStudyCount }} / {{ statistics.CountStudies
                             }}</span> -->
                         </router-link>

@@ -1,9 +1,9 @@
 <template>
   <div>
-    <table class="task-table table table-sm">
+    <table class="event-table table table-sm">
       <thead>
         <!-- Select All Checkbox in the search row -->
-        <tr class="task-table-headers">
+        <tr class="event-table-headers">
           <th>
             <input type="checkbox" v-model="selectAll" @change="toggleSelectAll" :indeterminate="isIndeterminate" />
           </th>
@@ -12,10 +12,11 @@
           </th>
         </tr>
         <!-- Filters row -->
-        <tr class="task-table-filters">
+        <tr class="event-table-filters">
           <th>
             <button @click="clearFilters" class="clear-filters-btn">
-              X <!-- Clear Filters -->
+              <!-- Clear Filters -->
+              <i class="bi bi-x-circle"></i>
             </button>
           </th>
           <th v-for="field in fields" :key="field.fieldName">
@@ -24,48 +25,66 @@
           </th>
         </tr>
         <!-- Operations row -->
-        <tr>
-          <td :colspan="fields.length + 1">
+        <tr class="event-table-operations">
+          <td class="selected-count" :colspan="1">
+            <div>
+              <p><strong>Count</strong></p>
+              <p>{{ selectedEvents ? selectedEvents.length : 0 }}</p>
+            </div>
+          </td>
+          <td :colspan="fields.length" class="operation-buttons">
             <!-- Add your operation buttons here -->
-            <button title="Reset Event Queues" @click="resetSelectedTasks" :disabled="selectedTasks.length === 0"
-              class="buttons bi bi-arrow-clockwise"></button>
-            <button title="Delete Event Queues" @click="deleteSelectedTasks" :disabled="selectedTasks.length === 0"
-              class="buttons bi bi-trash"></button>
+            <button title="Reload Event Queues" @click="fetchData" class="buttons bi bi-arrow-clockwise"></button>
+            <button title="Reset Event Queues" @click="handleResetSelectedEvents('many')"
+              :disabled="selectedEvents.length === 0" class="buttons bi bi-arrow-repeat"></button>
+            <button title="Delete Event Queues" @click="handleDeleteSelectedEvents('many')"
+              :disabled="selectedEvents.length === 0" class="buttons bi bi-trash"></button>
+            <MyNotification :notification="this.notification" />
           </td>
         </tr>
       </thead>
       <tbody>
         <template v-for="row in filteredData" :key="row.id">
           <!-- Main Row -->
-          <tr :class="'task-table-row ' + (showTasksDetails.includes(row.id) ? 'show-task-details' : '')"
-            @click="setShowTaskDetails(row.id)">
+          <tr :class="'event-table-row ' + (showEventsDetails.includes(row.id) ? 'show-event-details' : '')"
+            @click="setShowEventDetails(row.id)">
             <td>
-              <input type="checkbox" v-model="selectedTasks" :value="row.id" @click.stop />
+              <input type="checkbox" v-model="selectedEvents" :value="row.id" @click.stop />
             </td>
             <td v-for="field in fields" :key="field.fieldName" :title="row[fieldMappings[field.fieldName]]">
-              {{ field.fieldName.includes("Time") ? formatTimestamp(row[fieldMappings[field.fieldName]]) : row[fieldMappings[field.fieldName]] }}
+              {{ field.fieldName.includes("Time") ? formatTimestamp(row[fieldMappings[field.fieldName]]) :
+                row[fieldMappings[field.fieldName]] }}
             </td>
           </tr>
 
           <!-- Detail Row -->
-          <tr v-if="showTasksDetails.includes(row.id)">
-            <td :colspan="fields.length + 1" class="task-detail-row">
-              <MyTaskDetail :taskDetails="row" :fetchData="this.fetchData" />
+          <tr v-if="showEventsDetails.includes(row.id)">
+            <td :colspan="fields.length + 1" class="event-detail-row">
+              <MyEventDetail :eventDetails="row" :handleDeleteEvent="handleDeleteSelectedEvents"
+                :handleResetEvent="handleResetSelectedEvents" />
             </td>
           </tr>
         </template>
       </tbody>
     </table>
+    <MyConfirmModal v-if="showConfirmModal"
+      :events="(actionType == 'many' ? this.selectedEvents : JSON.parse(actionType))" :action="this.action"
+      :confirmText="this.confirmText" :cancelText="this.cancelText" :closeModal="this.handleCloseModal"
+      :fetchData="this.fetchData" :deselectAll="this.handleDeselectAll" :notify="this.notify" />
   </div>
 </template>
 
 <script>
-import MyTaskDetail from "./MyTaskDetail.vue";
+import MyConfirmModal from "./MyConfirmModal.vue";
+import MyEventDetail from "./MyEventDetail.vue";
+import MyNotification from "./MyNotification.vue";
 import myApi from "./myApi";
 
 export default {
   components: {
-    MyTaskDetail,
+    MyEventDetail,
+    MyConfirmModal,
+    MyNotification,
   },
   data() {
     return {
@@ -105,9 +124,18 @@ export default {
       },
       data: [], // Replace with actual data fetching logic
       filteredData: [],
-      selectedTasks: [], // Stores selected task IDs
+      selectedEvents: [], // Stores selected event IDs
       selectAll: false, // Flag to control the "Select All" checkbox
-      showTasksDetails: [],
+      showEventsDetails: [],
+      showConfirmModal: false,
+      confirmText: "Confirm",
+      cancelText: "Cancel",
+      actionType: "",
+      action: "",
+      notification: {
+        message: '',
+        type: 'success',
+      },
     };
   },
   mounted() {
@@ -132,47 +160,45 @@ export default {
         });
       });
     },
-    setShowTaskDetails(taskId) {
-      const check = this.showTasksDetails.some(id => id === taskId);
+    setShowEventDetails(eventId) {
+      const check = this.showEventsDetails.some(id => id === eventId);
       // console.log("check", check);
-      // console.log("taskId", taskId);
-      // console.log("showTasksDetails", this.showTasksDetails);
+      // console.log("eventId", eventId);
+      // console.log("showEventsDetails", this.showEventsDetails);
       if (check) {
-        this.showTasksDetails.splice(this.showTasksDetails.findIndex(id => id === taskId), 1); // Remove taskId from the array
+        this.showEventsDetails.splice(this.showEventsDetails.findIndex(id => id === eventId), 1); // Remove eventId from the array
       } else {
-        this.showTasksDetails.push(taskId); // Add taskId to the array
+        this.showEventsDetails.push(eventId); // Add eventId to the array
       }
     },
     toggleSelectAll() {
       if (this.selectAll) {
-        this.selectedTasks = this.filteredData.map(row => row.id);
+        this.selectedEvents = this.filteredData.map(row => row.id);
       } else {
-        this.selectedTasks = [];
+        this.selectedEvents = [];
       }
     },
-    async resetSelectedTasks() {
-      // Handle reset logic
-      try {
-        const response = await myApi.resetEventQueues(this.selectedTasks);
-        this.selectedTasks = [];
-        this.fetchData();
-      } catch (err) {
-        console.error("Failed to reset event queues: ", err);
-      }
+    handleOpenModal() {
+      this.showConfirmModal = true;
     },
-    async deleteSelectedTasks() {
-      // Handle deletion logic
-      try {
-        const response = await myApi.deleteEventQueues(this.selectedTasks);
-        this.selectedTasks = [];
-        this.fetchData();
-      } catch (err) {
-        console.error("Failed to delete event queues: ", err);
-      }
+    handleCloseModal() {
+      this.action = "";
+      this.actionType = "";
+      this.showConfirmModal = false;
     },
-    importTask() {
-      // Handle import logic here
-      console.log("Importing task");
+    handleDeleteSelectedEvents(src) {
+      this.actionType = src;
+      this.action = "delete";
+      this.handleOpenModal();
+    },
+    handleResetSelectedEvents(src) {
+      this.actionType = src;
+      this.action = "reset";
+      this.handleOpenModal();
+    },
+    handleDeselectAll() {
+      this.selectedEvents = [];
+      this.selectAll = false;
     },
     clearFilters() {
       // Clear all filters
@@ -180,6 +206,13 @@ export default {
         this.filters[key] = '';
       });
       this.search(); // Re-filter data with cleared filters
+    },
+    notify(message, type) {
+      this.notification.message = '';
+      // Small delay to re-trigger the watch
+      this.$nextTick(() => {
+        this.notification = { message, type };
+      });
     },
     formatTimestamp(timestamp) {
       // Check if timestamp exists and is a valid length (14 chars)
@@ -204,13 +237,13 @@ export default {
       },
       deep: true
     },
-    selectedTasks() {
-      this.selectAll = this.selectedTasks.length === this.filteredData.length;
+    selectedEvents() {
+      this.selectAll = this.selectedEvents.length === this.filteredData.length;
     }
   },
   computed: {
     isIndeterminate() {
-      return this.selectedTasks.length > 0 && this.selectedTasks.length < this.filteredData.length;
+      return this.selectedEvents.length > 0 && this.selectedEvents.length < this.filteredData.length;
     }
   }
 };
@@ -218,7 +251,7 @@ export default {
 
 <style scoped>
 /* General table styles */
-.task-table {
+.event-table {
   width: 100%;
   border-collapse: collapse;
   background-color: #fff;
@@ -226,7 +259,7 @@ export default {
   /* Ensures fixed column width */
 }
 
-.task-table th {
+.event-table th {
   padding: 8px;
   text-align: left;
   border-bottom: 1px solid #ddd;
@@ -239,7 +272,7 @@ export default {
   /* Ensure long words break if necessary */
 }
 
-.task-table td {
+.event-table td {
   padding: 8px;
   text-align: left;
   border-bottom: 1px solid #ddd;
@@ -253,14 +286,14 @@ export default {
   /* Optional: adjust width as necessary */
 }
 
-.task-table th {
+.event-table th {
   background-color: #bebebe;
   /* Darker gray for header */
   font-weight: bold;
   font-size: 14px;
 }
 
-.task-table-filters input {
+.event-table-filters input {
   width: 100%;
   padding: 5px;
   box-sizing: border-box;
@@ -270,32 +303,32 @@ export default {
   background-color: #fafafa;
 }
 
-.task-table-filters input:focus {
+.event-table-filters input:focus {
   outline: none;
   border-color: #007bff;
 }
 
 /* Odd rows background color */
-.task-table>tbody>tr:nth-child(odd)>td {
+.event-table>tbody>tr:nth-child(odd)>td {
   background-color: var(--study-odd-bg-color);
   /* Custom variable for odd row color */
 }
 
 /* Even rows background color */
-.task-table>tbody>tr:nth-child(even)>td {
+.event-table>tbody>tr:nth-child(even)>td {
   background-color: var(--study-even-bg-color);
   /* Custom variable for even row color */
 }
 
 /* Prevent hover effect on the first row of tbody (header row) */
-.task-table>tbody>.task-table-row:hover>* {
+.event-table>tbody>.event-table-row:hover>* {
   background-color: var(--study-hover-color);
   /* Custom variable for hover color */
 }
 
 /* Add styling for the first checkbox column */
-.task-table th:first-child,
-.task-table td:first-child {
+.event-table th:first-child,
+.event-table td:first-child {
   width: 5%;
   /* Adjust the width of the checkbox column */
   text-align: center;
@@ -304,11 +337,19 @@ export default {
 /* Style for operation buttons */
 button {
   margin-right: 10px;
-  padding: 5px 10px;
+  padding: 12px 17px;
   background-color: #007bff;
   color: white;
   border: none;
   border-radius: 4px;
+}
+
+button:hover {
+  background-color: #006adb;
+}
+
+button:active {
+  background-color: #005ec2;
 }
 
 button:disabled {
@@ -324,6 +365,8 @@ button:disabled {
   font-size: 14px;
   cursor: pointer;
   border-radius: 4px;
+  margin-left: auto;
+  margin-right: auto;;
 }
 
 .clear-filters-btn:hover {
@@ -337,47 +380,47 @@ button:disabled {
 /* Responsive design */
 @media (max-width: 768px) {
 
-  .task-table th,
-  .task-table td {
+  .event-table th,
+  .event-table td {
     font-size: 12px;
     padding: 6px;
   }
 
-  .task-table {
+  .event-table {
     width: 100%;
     font-size: 12px;
   }
 
-  .task-table-filters input {
+  .event-table-filters input {
     padding: 4px;
   }
 }
 
 /* Add focus effect for input fields */
-.task-table-filters input:focus {
+.event-table-filters input:focus {
   border-color: #007bff;
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
 }
 
-.task-table-headers th {
+.event-table-headers th {
   background-color: #fff !important;
 }
 
-.task-table .show-task-details>td {
+.event-table .show-event-details>td {
   background-color: var(--study-selected-color) !important;
   border-top: 3px solid black !important;
 }
 
-.task-table .show-task-details:hover>td {
+.event-table .show-event-details:hover>td {
   background-color: #dadada !important;
   border-top: 3px solid black !important;
 }
 
-.task-table .hide-task-detail {
+.event-table .hide-event-detail {
   display: none;
 }
 
-.task-table .show-task-detail {
+.event-table .show-event-detail {
   display: block;
   background-color: #f9f9f9;
   padding: 10px;
@@ -386,8 +429,31 @@ button:disabled {
   border-radius: 4px;
 }
 
-.task-table .task-detail-row {
+.event-table .event-detail-row {
   background-color: var(--study-selected-color) !important;
   border-bottom: 3px solid black !important;
+}
+
+.selected-count>div>p {
+  margin: 0;
+  padding: 0;
+}
+
+.operation-buttons {
+  vertical-align: middle;
+  padding: 0;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  box-shadow: inset 0 -1px 0 #ccc;
+  border-bottom: 2px solid #b8b6b6;
 }
 </style>

@@ -147,8 +147,16 @@ export default {
         const response = await myApi.getEventQueues();
         this.data = response.events || response;
         this.filteredData = this.data;
+        this.notify({
+          message: `Successfully loaded event queue.`,
+          type: 'success'
+        });
       } catch (error) {
         console.error("Failed to fetch data:", error);
+        this.notify({
+          message: `Failed to load event queue: ${error.message}`,
+          type: 'error'
+        });
       }
     },
     search() {
@@ -366,7 +374,8 @@ button:disabled {
   cursor: pointer;
   border-radius: 4px;
   margin-left: auto;
-  margin-right: auto;;
+  margin-right: auto;
+  ;
 }
 
 .clear-filters-btn:hover {

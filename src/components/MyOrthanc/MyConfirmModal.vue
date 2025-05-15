@@ -2,7 +2,7 @@
     <div class="modal-overlay" id="confirmModal">
         <div class="modal-box">
             <h2 class="modal-title">Confirmation</h2>
-            <p>Are you sure you want to {{ action }} these <strong>{{ this.events.length }}</strong> events?</p>
+            <p>Are you sure you want to {{ action }} {{ this.events.length > 1 ? 'these' : 'this' }} <strong>{{ this.events.length > 1 ? this.events.length : '' }}</strong> event{{ this.events.length > 1 ? 's' : '' }}?</p>
             <p><i>{{ events }}</i></p>
             <div class="modal-actions">
                 <button @click="confirmAction()">{{ confirmText }}</button>
@@ -89,7 +89,7 @@ export default {
             try {
                 const response = await myApi.resetEventQueues(this.events);
                 this.notify({
-                    message: `Successfully reset ${this.events.length} events.`,
+                    message: `Successfully reset ${this.events.length} event${(this.events.length > 1 ? 's' : '')}.`,
                     type: 'success'
                 });
                 this.deselectAll();
@@ -97,7 +97,7 @@ export default {
             } catch (err) {
                 console.error("Failed to reset event queues: ", err);
                 this.notify({
-                    message: `Failed to reset events: ${err.message}`,
+                    message: `Failed to reset event(s): ${err.message}`,
                     type: 'error'
                 });
             }
@@ -149,7 +149,7 @@ export default {
 }
 
 .modal-actions {
-    margin-top: 20px;
+    margin-top: 12px;
     display: flex;
     justify-content: center;
     gap: 20px;

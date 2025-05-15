@@ -142,21 +142,25 @@ export default {
     this.fetchData();
   },
   methods: {
-    async fetchData() {
+    async fetchData(option) {
       try {
         const response = await myApi.getEventQueues();
         this.data = response.events || response;
         this.filteredData = this.data;
-        this.notify({
-          message: `Successfully loaded event queue.`,
-          type: 'success'
-        });
+        if (option !== "no-notification") {
+          this.notify({
+            message: `Successfully loaded event queue.`,
+            type: 'success'
+          });
+        }
       } catch (error) {
         console.error("Failed to fetch data:", error);
-        this.notify({
-          message: `Failed to load event queue: ${error.message}`,
-          type: 'error'
-        });
+        if (option !== "no-notification") {
+          this.notify({
+            message: `Failed to load event queue: ${error.message}`,
+            type: 'error'
+          });
+        }
       }
     },
     search() {

@@ -70,12 +70,12 @@ export default {
             // Handle deletion logic
             try {
                 const response = await myApi.deleteEventQueues(this.events);
+                this.deselectAll();
+                this.fetchData("no-notification");
                 this.notify({
                     message: `Successfully deleted ${this.events.length} event(s).`,
                     type: 'success'
                 });
-                this.deselectAll();
-                this.fetchData();
             } catch (err) {
                 console.error("Failed to delete event queues: ", err);
                 this.notify({
@@ -88,12 +88,12 @@ export default {
             // Handle reset logic
             try {
                 const response = await myApi.resetEventQueues(this.events);
+                this.deselectAll();
+                this.fetchData("no-notification");
                 this.notify({
                     message: `Successfully reset ${this.events.length} event${(this.events.length > 1 ? 's' : '')}.`,
                     type: 'success'
                 });
-                this.deselectAll();
-                this.fetchData();
             } catch (err) {
                 console.error("Failed to reset event queues: ", err);
                 this.notify({

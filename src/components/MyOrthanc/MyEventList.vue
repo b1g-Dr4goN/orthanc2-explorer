@@ -102,12 +102,12 @@ export default {
       fieldMappings: {
         "ID": "id",
         "App ID": "app_id",
-        "Creation Time": "creation_time",
-        "Delay Sec": "delay_sec",
+        "Creation Time": "creationTime",
+        "Delay Sec": "delaySec",
         "IUID": "iuid",
-        "Last Updated Time": "last_updated_time",
-        "Resource ID": "resource_id",
-        "Resource Type": "resource_type",
+        "Last Updated Time": "lastUpdatedTime",
+        "Resource ID": "resourceId",
+        "Resource Type": "resourceType",
         "Retry": "retry",
       },
       filters: {

@@ -18,6 +18,6 @@ export default {
     },
     async deleteEventQueues(events) {
         const body = JSON.stringify(events);
-        return (await axios.delete(myOrthancApi + "/delete-event-queues", { ...headers, data: events}));
+        return (await axios.post(myOrthancApi + "/delete-event-queues", { ...headers, data: events}));
     }
 }

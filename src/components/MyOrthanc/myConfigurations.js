@@ -1,1 +1,1 @@
-export var myOrthancApi = "http://localhost:18042/itech";
+export var myOrthancApi = "/itech";

@@ -1,23 +1,22 @@
 import { myOrthancApi } from "./myConfigurations";
 import axios from 'axios';
 
-const username = 'orthanc';
-const password = 'orthanc';
-const auth = 'Basic ' + btoa(username + ':' + password);
-const headers = {
-    'Authorization': auth,
-    'Content-Type': 'application/json',
-};
+// const username = 'orthanc';
+// const password = 'orthanc';
+// const auth = 'Basic ' + btoa(username + ':' + password);
+// const headers = {
+//     'Authorization': auth,
+//     'Content-Type': 'application/json',
+// };
 
 export default {
     async getEventQueues() {
-        return ((await axios.get(myOrthancApi + "/event-queues", headers)).data);
+        return ((await axios.get(myOrthancApi + "/event-queues")).data);
     },
     async resetEventQueues(events) {
-        return (await axios.post(myOrthancApi + "/reset-event-queues", events, headers));
+        return (await axios.post(myOrthancApi + "/reset-event-queues", events));
     },
     async deleteEventQueues(events) {
-        const body = JSON.stringify(events);
-        return (await axios.post(myOrthancApi + "/delete-event-queues", { ...headers, data: events}));
+        return (await axios.post(myOrthancApi + "/delete-event-queues", events));
     }
 }

@@ -11,7 +11,7 @@ const headers = {
 
 export default {
     async getEventQueues() {
-        return ((await axios.get(myOrthancApi + "/items", headers)).data);
+        return ((await axios.get(myOrthancApi + "/event-queues", headers)).data);
     },
     async resetEventQueues(events) {
         return (await axios.post(myOrthancApi + "/reset-event-queues", events, headers));

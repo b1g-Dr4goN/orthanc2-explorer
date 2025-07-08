@@ -5,6 +5,7 @@ import SettingsPermissions from './components/SettingsPermissions.vue'
 import StudyList from './components/StudyList.vue'
 import MySideBar from './components/MyOrthanc/MySideBar.vue'
 import MyEventList from './components/MyOrthanc/MyEventList.vue'
+import MyStudyList from './components/MyOrthanc/MyStudyList.vue'
 // import SideBar from './components/SideBar.vue'
 import NotFound from './components/NotFound.vue'
 import { baseOe2Url } from "./globalConfigurations"
@@ -34,19 +35,33 @@ export const router = createRouter({
       name: 'home'
     },
     {
+      path: '/my-event-queue',
+      components: {
+        SideBarView: MySideBar,
+        ContentView: MyEventList,
+      },
+    },
+    {
+      path: '/my-study-list',
+      components: {
+        SideBarView: MySideBar,
+        ContentView: MyStudyList,
+      },
+    },
+    {
+      path: '/my-study-list/filtered-studies',
+      components: {
+        SideBarView: MySideBar,
+        ContentView: MyStudyList,
+      }
+    },
+    {
       path: '/filtered-studies',
       components: {
         SideBarView: MySideBar,
         ContentView: StudyList,
       },
       name: 'local-studies-list'
-    },
-    {
-      path: '/my-event-queue',
-      components: {
-        SideBarView: MySideBar,
-        ContentView: MyEventList,
-      },
     },
     {
       path: '/settings',

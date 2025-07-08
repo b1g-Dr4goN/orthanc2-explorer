@@ -42,18 +42,19 @@ export default {
                 transformedInstanceTags[v['Name']] = v['Value'];
             }
         }
-        
+
         for (let levelTags of [patientMainDicomTags, studyMainDicomTags, seriesMainDicomTags, transformedInstanceTags]) {
             if (levelTags != null) {
                 for (const [k, v] of Object.entries(levelTags)) {
-                    output = output.replace("{" + k + "}", v);
+                    output = output?.replace("{" + k + "}", v) ?? undefined;
                 }
             }
         }
 
-        output = output.replace("{UUID}", resourceId);
-        output = output.replace(/{[^}]+}/g, 'undefined');
-        return output;
+        output = output?.replace("{UUID}", resourceId);
+        output = output?.replace(/{[^}]+}/g, 'undefined');
+
+        return output ?? undefined;
     },
 
     async replaceResourceTagsInStringWithTokens(template, patientMainDicomTags, studyMainDicomTags, seriesMainDicomTags, instanceTags, resourceId, resourceLevel) {
@@ -62,10 +63,10 @@ export default {
         const matchStudyResourceToken = output.match(/\{study-resource-token\/(.*?)\}/);
         if (matchStudyResourceToken) {
             const tokenType = matchStudyResourceToken[1];
-            const resourceToken = await api.createToken({ 
-                tokenType: tokenType, 
-                resourcesIds: [resourceId], 
-                level: resourceLevel, 
+            const resourceToken = await api.createToken({
+                tokenType: tokenType,
+                resourcesIds: [resourceId],
+                level: resourceLevel,
                 validityDuration: store.state.configuration.tokens.InstantLinksValidity
             });
             output = output.replace('{study-resource-token/' + tokenType + '}', resourceToken['Token']);
@@ -79,7 +80,7 @@ export default {
             return null;
         }
         let output = {};
-        
+
         for (const [k, v] of Object.entries(template)) {
             if (typeof v === 'string') {
                 if (v.indexOf('{') != -1) {
@@ -107,8 +108,8 @@ export default {
         return output;
     },
 
-    patientNameCapture : "([^\\^]+)\\^?([^\\^]+)?\\^?([^\\^]+)?\\^?([^\\^]+)?\\^?([^\\^]+)?",
-    patientNameFormatting : null,
+    patientNameCapture: "([^\\^]+)\\^?([^\\^]+)?\\^?([^\\^]+)?\\^?([^\\^]+)?\\^?([^\\^]+)?",
+    patientNameFormatting: null,
     formatPatientName(originalPatientName) {
         if (originalPatientName && this.patientNameFormatting && this.patientNameCapture) {
             return originalPatientName.replace(new RegExp(this.patientNameCapture), this.patientNameFormatting);
@@ -123,8 +124,7 @@ export default {
                 if ((["osimis-web-viewer", "stone-webviewer", "volview", "wsi"].indexOf(viewer) != -1 && viewer in store.state.configuration.installedPlugins) ||
                     (viewer.startsWith("ohif") && viewer in store.state.configuration.installedPlugins) ||
                     (viewer.startsWith("ohif") && store.state.configuration.uiOptions.EnableOpenInOhifViewer3) ||
-                    (viewer == "meddream" && store.state.configuration.uiOptions.EnableOpenInMedDreamViewer))
-                {
+                    (viewer == "meddream" && store.state.configuration.uiOptions.EnableOpenInMedDreamViewer)) {
                     return this.getViewerUrl(level, orthancId, dicomId, viewer);
                 }
             }

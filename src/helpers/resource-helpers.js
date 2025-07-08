@@ -42,19 +42,18 @@ export default {
                 transformedInstanceTags[v['Name']] = v['Value'];
             }
         }
-
+        
         for (let levelTags of [patientMainDicomTags, studyMainDicomTags, seriesMainDicomTags, transformedInstanceTags]) {
             if (levelTags != null) {
                 for (const [k, v] of Object.entries(levelTags)) {
-                    output = output?.replace("{" + k + "}", v) ?? undefined;
+                    output = output.replace("{" + k + "}", v);
                 }
             }
         }
 
-        output = output?.replace("{UUID}", resourceId);
-        output = output?.replace(/{[^}]+}/g, 'undefined');
-
-        return output ?? undefined;
+        output = output.replace("{UUID}", resourceId);
+        output = output.replace(/{[^}]+}/g, 'undefined');
+        return output;
     },
 
     async replaceResourceTagsInStringWithTokens(template, patientMainDicomTags, studyMainDicomTags, seriesMainDicomTags, instanceTags, resourceId, resourceLevel) {
@@ -63,10 +62,10 @@ export default {
         const matchStudyResourceToken = output.match(/\{study-resource-token\/(.*?)\}/);
         if (matchStudyResourceToken) {
             const tokenType = matchStudyResourceToken[1];
-            const resourceToken = await api.createToken({
-                tokenType: tokenType,
-                resourcesIds: [resourceId],
-                level: resourceLevel,
+            const resourceToken = await api.createToken({ 
+                tokenType: tokenType, 
+                resourcesIds: [resourceId], 
+                level: resourceLevel, 
                 validityDuration: store.state.configuration.tokens.InstantLinksValidity
             });
             output = output.replace('{study-resource-token/' + tokenType + '}', resourceToken['Token']);
@@ -80,7 +79,7 @@ export default {
             return null;
         }
         let output = {};
-
+        
         for (const [k, v] of Object.entries(template)) {
             if (typeof v === 'string') {
                 if (v.indexOf('{') != -1) {
@@ -108,8 +107,8 @@ export default {
         return output;
     },
 
-    patientNameCapture: "([^\\^]+)\\^?([^\\^]+)?\\^?([^\\^]+)?\\^?([^\\^]+)?\\^?([^\\^]+)?",
-    patientNameFormatting: null,
+    patientNameCapture : "([^\\^]+)\\^?([^\\^]+)?\\^?([^\\^]+)?\\^?([^\\^]+)?\\^?([^\\^]+)?",
+    patientNameFormatting : null,
     formatPatientName(originalPatientName) {
         if (originalPatientName && this.patientNameFormatting && this.patientNameCapture) {
             return originalPatientName.replace(new RegExp(this.patientNameCapture), this.patientNameFormatting);
@@ -118,34 +117,40 @@ export default {
         }
     },
 
-    getPrimaryViewerUrl(level, orthancId, dicomId) {
+    getPrimaryViewer() {
         if (store.state.configuration.uiOptions.ViewersOrdering.length > 0) {
             for (let viewer of store.state.configuration.uiOptions.ViewersOrdering) {
                 if ((["osimis-web-viewer", "stone-webviewer", "volview", "wsi"].indexOf(viewer) != -1 && viewer in store.state.configuration.installedPlugins) ||
                     (viewer.startsWith("ohif") && viewer in store.state.configuration.installedPlugins) ||
                     (viewer.startsWith("ohif") && store.state.configuration.uiOptions.EnableOpenInOhifViewer3) ||
-                    (viewer == "meddream" && store.state.configuration.uiOptions.EnableOpenInMedDreamViewer)) {
-                    return this.getViewerUrl(level, orthancId, dicomId, viewer);
+                    (viewer == "meddream" && store.state.configuration.uiOptions.EnableOpenInMedDreamViewer))
+                {
+                    return viewer;
                 }
             }
         }
         return null;
+    },
+
+    getPrimaryViewerUrl(level, orthancId, dicomId) {
+        const viewer = this.getPrimaryViewer();
+        return this.getViewerUrl(level, orthancId, dicomId, viewer);
     },
 
     getPrimaryViewerTokenType() {
-        if (store.state.configuration.uiOptions.ViewersOrdering.length > 0) {
-            for (let viewer of store.state.configuration.uiOptions.ViewersOrdering) {
-                if (viewer == "meddream") {
-                    return "meddream-instant-link";
-                } else {
-                    return "viewer-instant-link";
-                }
-            }
+        const viewer = this.getPrimaryViewer();
+        if (viewer == "meddream") {
+            return "meddream-instant-link";
+        } else {
+            return "viewer-instant-link";
         }
-        return null;
     },
 
     getViewerUrl(level, orthancId, dicomId, viewer) {
+        if (!viewer) {
+            return null;
+        }
+        
         if (viewer == 'osimis-web-viewer') {
             return api.getOsimisViewerUrl(level, orthancId);
         } else if (viewer == 'stone-webviewer') {

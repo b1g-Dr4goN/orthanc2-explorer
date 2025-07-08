@@ -110,6 +110,34 @@
     "loading_latest_studies": "Loading most recent studies",
     "local_studies": "All local Studies",
     "my_event_queue": "My Event Queue",
+    "my_event_queue_tags": {
+        "app_id": "App ID",
+        "app_type": "App Type",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "confirmation": "Confirmation",
+        "confirmation_msg": "Are you sure you want to",
+        "count": "Count",
+        "creation_time": "Creation Time",
+        "delay_sec": "Delay Sec",
+        "delete": "Delete Event(s)",
+        "details": "Details of",
+        "event": "Event",
+        "fail": "Failed to",
+        "failed_reason": "Failed Reason",
+        "id": "ID",
+        "iuid": "IUID",
+        "last_updated_time": "Last Updated Time",
+        "operations": "Operations",
+        "reload": "Reload Event Queue",
+        "reset": "Reset Event(s)",
+        "resource_id": "Resource ID",
+        "resource_type": "Resource Type",
+        "retry": "Retry",
+        "success": "Successfully"
+    },
+    "my_local_studies": "My local Studies",
+    "my_orthanc_menu": "My Orthanc Menu",
     "logout": "Logout",
     "modalities_in_study": "Modalities in Study",
     "modify": {
@@ -162,6 +190,9 @@
     "plugins": {
         "delayed_deletion": {
             "pending_files_count": "Delayed Deletion plugin: Files to delete"
+        },
+        "advanced_storage": {
+            "pending_deletion_files_count": "Advanced Storage - Delayed Deletion: Files to delete"
         },
         "housekeeper": {
             "progress_status": "Housekeeper plugin: changes processed",

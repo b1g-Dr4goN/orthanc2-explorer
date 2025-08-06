@@ -1,5 +1,5 @@
-import store from "../store"
-import api from "../orthancApi"
+import store from "../../../store"
+import api from "../../../orthancApi"
 
 export default {
     getResourceTitle(resourceType, patientMainDicomTags, studyMainDicomTags, seriesMainDicomTags, instanceTags) {
@@ -42,11 +42,45 @@ export default {
                 transformedInstanceTags[v['Name']] = v['Value'];
             }
         }
-        
-        for (let levelTags of [patientMainDicomTags, studyMainDicomTags, seriesMainDicomTags, transformedInstanceTags]) {
-            if (levelTags != null) {
-                for (const [k, v] of Object.entries(levelTags)) {
-                    output = output.replace("{" + k + "}", v);
+
+        if (resourceLevel == "studies") {
+            const myPatientMainDicomTags = patientMainDicomTags ? patientMainDicomTags.reduce((acc, obj) => {
+                Object.keys(obj).forEach(key => {
+                    if (!acc[key]) acc[key] = [];
+                    acc[key].push(obj[key]);
+                });
+                return acc;
+            }, {}) : undefined;
+
+            const myStudyMainDicomTags = studyMainDicomTags ? studyMainDicomTags.reduce((acc, obj) => {
+                Object.keys(obj).forEach(key => {
+                    if (!acc[key]) acc[key] = [];
+                    acc[key].push(obj[key]);
+                });
+                return acc;
+            }, {}) : undefined;
+
+            const mySeriesMainDicomTags = seriesMainDicomTags ? seriesMainDicomTags.reduce((acc, obj) => {
+                Object.keys(obj).forEach(key => {
+                    if (!acc[key]) acc[key] = [];
+                    acc[key].push(obj[key]);
+                });
+                return acc;
+            }, {}) : undefined;
+
+            for (let levelTags of [myPatientMainDicomTags, myStudyMainDicomTags, mySeriesMainDicomTags, transformedInstanceTags]) {
+                if (levelTags != null) {
+                    for (const [k, v] of Object.entries(levelTags)) {
+                        output = output.replace("{" + k + "}", v);
+                    }
+                }
+            }
+        } else {
+            for (let levelTags of [patientMainDicomTags, studyMainDicomTags, seriesMainDicomTags, transformedInstanceTags]) {
+                if (levelTags != null) {
+                    for (const [k, v] of Object.entries(levelTags)) {
+                        output = output.replace("{" + k + "}", v);
+                    }
                 }
             }
         }

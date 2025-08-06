@@ -78,8 +78,7 @@
 import MyConfirmModal from "./MyConfirmModal.vue";
 import MyEventDetail from "./MyEventDetail.vue";
 import MyNotification from "./MyNotification.vue";
-import myApi from "./myApi";
-import $ from "jquery";
+import myApi from "./configs/myApi";
 
 export default {
   components: {

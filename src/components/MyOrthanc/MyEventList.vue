@@ -8,7 +8,7 @@
             <input type="checkbox" v-model="selectAll" @change="toggleSelectAll" :indeterminate="isIndeterminate" />
           </th>
           <th v-for="field in fields" :key="field.fieldName" :style="{ width: field.width }">
-            {{ field.fieldName }}
+            {{ $t('my_event_queue_tags.' + field.fieldName) }}
           </th>
         </tr>
         <!-- Filters row -->
@@ -28,16 +28,16 @@
         <tr class="event-table-operations">
           <td class="selected-count" :colspan="1">
             <div>
-              <p><strong>Count</strong></p>
+              <p><strong>{{ $t('my_event_queue_tags.count') }}</strong></p>
               <p>{{ selectedEvents ? selectedEvents.length : 0 }}</p>
             </div>
           </td>
           <td :colspan="fields.length" class="operation-buttons">
             <!-- Add your operation buttons here -->
-            <button title="Reload Event Queues" @click="fetchData" class="buttons bi bi-arrow-clockwise"></button>
-            <button title="Reset Event Queues" @click="handleResetSelectedEvents('many')"
+            <button :title="$t('my_event_queue_tags.reload')" @click="fetchData('notify')" class="buttons bi bi-arrow-clockwise"></button>
+            <button :title="$t('my_event_queue_tags.reset')" @click="handleResetSelectedEvents('many')"
               :disabled="selectedEvents.length === 0" class="buttons bi bi-arrow-repeat"></button>
-            <button title="Delete Event Queues" @click="handleDeleteSelectedEvents('many')"
+            <button :title="$t('my_event_queue_tags.delete')" @click="handleDeleteSelectedEvents('many')"
               :disabled="selectedEvents.length === 0" class="buttons bi bi-trash"></button>
             <MyNotification :notification="this.notification" />
           </td>
@@ -70,7 +70,7 @@
     <MyConfirmModal v-if="showConfirmModal"
       :events="(actionType == 'many' ? this.selectedEvents : JSON.parse(actionType))" :action="this.action"
       :confirmText="this.confirmText" :cancelText="this.cancelText" :closeModal="this.handleCloseModal"
-      :fetchData="this.fetchData" :deselectAll="this.handleDeselectAll" :notify="this.notify" />
+      :fetchData="this.fetchData" :deselectAll="this.handleDeselectAll" :notify="this.notify" :t="this.$t" />
   </div>
 </template>
 
@@ -89,26 +89,26 @@ export default {
   data() {
     return {
       fields: [
-        { fieldName: "ID", width: "5%", placeholder: "1234", isOrderable: true },
-        { fieldName: "App ID", width: "5%", placeholder: "ABCD1234", isOrderable: false },
-        { fieldName: "Creation Time", width: "7%", placeholder: "YYYYDDMMTHHMMSS", isOrderable: true },
-        { fieldName: "Last Updated Time", width: "7%", placeholder: "YYYYDDMMTHHMMSS", isOrderable: true },
-        { fieldName: "IUID", width: "13%", placeholder: "1.23.456", isOrderable: false },
-        { fieldName: "Resource ID", width: "13%", placeholder: "abcd-1234", isOrderable: false },
-        { fieldName: "Resource Type", width: "5%", placeholder: "Study", isOrderable: false },
-        { fieldName: "Delay Sec", width: "4%", placeholder: "1234", isOrderable: true },
-        { fieldName: "Retry", width: "3%", placeholder: "1234", isOrderable: true },
+        { fieldName: "id", width: "5%", placeholder: "1234", isOrderable: true },
+        { fieldName: "app_id", width: "5%", placeholder: "ABCD1234", isOrderable: false },
+        { fieldName: "creation_time", width: "7%", placeholder: "YYYYDDMMTHHMMSS", isOrderable: true },
+        { fieldName: "last_updated_time", width: "7%", placeholder: "YYYYDDMMTHHMMSS", isOrderable: true },
+        { fieldName: "iuid", width: "13%", placeholder: "1.23.456", isOrderable: false },
+        { fieldName: "resource_id", width: "13%", placeholder: "abcd-1234", isOrderable: false },
+        { fieldName: "resource_type", width: "5%", placeholder: "Study", isOrderable: false },
+        { fieldName: "delay_sec", width: "4%", placeholder: "1234", isOrderable: true },
+        { fieldName: "retry", width: "3%", placeholder: "1234", isOrderable: true },
       ],
       fieldMappings: {
-        "ID": "id",
-        "App ID": "app_id",
-        "Creation Time": "creationTime",
-        "Delay Sec": "delaySec",
-        "IUID": "iuid",
-        "Last Updated Time": "lastUpdatedTime",
-        "Resource ID": "resourceId",
-        "Resource Type": "resourceType",
-        "Retry": "retry",
+        "id": "id",
+        "app_id": "app_id",
+        "creation_time": "creationTime",
+        "delay_sec": "delaySec",
+        "iuid": "iuid",
+        "last_updated_time": "lastUpdatedTime",
+        "resource_id": "resourceId",
+        "resource_type": "resourceType",
+        "retry": "retry",
       },
       filters: {
         app_id: '',
@@ -128,8 +128,8 @@ export default {
       selectAll: false, // Flag to control the "Select All" checkbox
       showEventsDetails: [],
       showConfirmModal: false,
-      confirmText: "Confirm",
-      cancelText: "Cancel",
+      confirmText: this.$t('my_event_queue_tags.confirm'),
+      cancelText: this.$t('my_event_queue_tags.cancel'),
       actionType: "",
       action: "",
       notification: {
@@ -147,15 +147,15 @@ export default {
         const response = await myApi.getEventQueues();
         this.data = response.events || response;
         this.filteredData = this.data;
-        if (option !== "no-notification") {
+        if (option === "notify") {
           this.notify({
-            message: `Successfully loaded event queue.`,
+            message: this.$t('my_event_queue_tags.reload') + " " + this.$t('my_event_queue_tags.success'),
             type: 'success'
           });
         }
       } catch (error) {
         console.error("Failed to fetch data:", error);
-        if (option !== "no-notification") {
+        if (option === "notify") {
           this.notify({
             message: `Failed to load event queue: ${error.message}`,
             type: 'error'

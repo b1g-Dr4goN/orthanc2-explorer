@@ -1,16 +1,16 @@
 <template>
     <div>
         <div class="event-detail-container">
-            <div class="event-detail-header"><strong>Event #{{ eventDetails[fieldMappings["ID"]] }} Details</strong>
+            <div class="event-detail-header"><strong>{{ $t('my_event_queue_tags.details') + " " + $t('my_event_queue_tags.event') + " #" + eventDetails[fieldMappings["id"]] }}</strong>
             </div>
             <div class="event-detail-content">
                 <!-- Event Details Column -->
                 <div class="event-detail-column event-details" style="width: 68%;">
                     <div class="event-detail-row" v-for="(field, i) in fields" :key="i">
                         <div class="event-detail-field">
-                            <strong>{{ field.fieldName }}:&nbsp;</strong>
+                            <strong>{{ $t('my_event_queue_tags.' + field.fieldName) }}:&nbsp;</strong>
                             <div class="event-detail-label">
-                                {{ field.fieldName.includes("Time") ?
+                                {{ field.fieldName.includes("time") ?
                                     formatTimestamp(eventDetails[fieldMappings?.[field.fieldName]]) :
                                     eventDetails[fieldMappings[field.fieldName]] }}
                             </div>
@@ -30,8 +30,8 @@
                         <div class="operation-placeholder">
                             <strong>Operations</strong>
                             <!-- Placeholder for buttons or operations -->
-                            <button title="Reset Event" @click="handleResetEvent(`[${this.eventDetails.id}]`)" class="buttons bi bi-arrow-repeat"></button>
-                            <button title="Delete Event" @click="handleDeleteEvent(`[${this.eventDetails.id}]`)" class="buttons bi bi-trash"></button>
+                            <button :title="$t('my_event_queue_tags.reset')" @click="handleResetEvent(`[${this.eventDetails.id}]`)" class="buttons bi bi-arrow-repeat"></button>
+                            <button :title="$t('my_event_queue_tags.delete')" @click="handleDeleteEvent(`[${this.eventDetails.id}]`)" class="buttons bi bi-trash"></button>
                         </div>
                     </div>
                 </div>
@@ -64,30 +64,30 @@ export default {
     data() {
         return {
             fields: [
-                { fieldName: "ID", width: "5%", placeholder: "1234", isOrderable: true },
-                { fieldName: "App ID", width: "5%", placeholder: "ABCD1234", isOrderable: false },
-                { fieldName: "App Type", width: "5%", placeholder: "StoreServer", isOrderable: false },
-                { fieldName: "Creation Time", width: "7%", placeholder: "YYYYDDMMTHHMMSS", isOrderable: true },
-                { fieldName: "Last Updated Time", width: "7%", placeholder: "YYYYDDMMTHHMMSS", isOrderable: true },
-                { fieldName: "IUID", width: "13%", placeholder: "1.23.456", isOrderable: false },
-                { fieldName: "Resource ID", width: "13%", placeholder: "abcd-1234", isOrderable: false },
-                { fieldName: "Resource Type", width: "5%", placeholder: "Study", isOrderable: false },
-                { fieldName: "Delay Sec", width: "4%", placeholder: "1234", isOrderable: true },
-                { fieldName: "Retry", width: "3%", placeholder: "1234", isOrderable: true },
-                { fieldName: "Failed Reason", width: "11%", placeholder: "ABCD1234", isOrderable: false },
+                { fieldName: "id", width: "5%", placeholder: "1234", isOrderable: true },
+                { fieldName: "app_id", width: "5%", placeholder: "ABCD1234", isOrderable: false },
+                { fieldName: "app_type", width: "5%", placeholder: "StoreServer", isOrderable: false },
+                { fieldName: "creation_time", width: "7%", placeholder: "YYYYDDMMTHHMMSS", isOrderable: true },
+                { fieldName: "last_updated_time", width: "7%", placeholder: "YYYYDDMMTHHMMSS", isOrderable: true },
+                { fieldName: "iuid", width: "13%", placeholder: "1.23.456", isOrderable: false },
+                { fieldName: "resource_id", width: "13%", placeholder: "abcd-1234", isOrderable: false },
+                { fieldName: "resource_type", width: "5%", placeholder: "Study", isOrderable: false },
+                { fieldName: "delay_sec", width: "4%", placeholder: "1234", isOrderable: true },
+                { fieldName: "retry", width: "3%", placeholder: "1234", isOrderable: true },
+                { fieldName: "failed_reason", width: "11%", placeholder: "ABCD1234", isOrderable: false },
             ],
             fieldMappings: {
-                "App ID": "app_id",
-                "App Type": "app_type",
-                "Creation Time": "creationTime",
-                "Delay Sec": "delaySec",
-                "Failed Reason": "failedReason",
-                "ID": "id",
-                "IUID": "iuid",
-                "Last Updated Time": "lastUpdatedTime",
-                "Resource ID": "resourceId",
-                "Resource Type": "resourceType",
-                "Retry": "retry",
+                "app_id": "app_id",
+                "app_type": "app_type",
+                "creation_time": "creationTime",
+                "delay_sec": "delaySec",
+                "failed_reason": "failedReason",
+                "id": "id",
+                "iuid": "iuid",
+                "last_updated_time": "lastUpdatedTime",
+                "resource_id": "resourceId",
+                "resource_type": "resourceType",
+                "retry": "retry",
             },
         };
     },

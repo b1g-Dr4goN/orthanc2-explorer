@@ -1,8 +1,8 @@
 <template>
     <div class="modal-overlay" id="confirmModal">
         <div class="modal-box">
-            <h2 class="modal-title">Confirmation</h2>
-            <p>Are you sure you want to {{ action }} {{ this.events.length > 1 ? 'these' : 'this' }} <strong>{{ this.events.length > 1 ? this.events.length : '' }}</strong> event{{ this.events.length > 1 ? 's' : '' }}?</p>
+            <h2 class="modal-title">{{ this.$t('my_event_queue_tags.confirmation') }}</h2>
+            <p>{{ this.$t('my_event_queue_tags.confirmation_msg') }} {{ this.$t('my_event_queue_tags.' + action) }}:</p>
             <p><i>{{ events }}</i></p>
             <div class="modal-actions">
                 <button @click="confirmAction()">{{ confirmText }}</button>
@@ -28,11 +28,11 @@ export default {
         },
         confirmText: {
             type: String,
-            default: 'Confirm'
+            required: true,
         },
         cancelText: {
             type: String,
-            default: 'Cancel'
+            required: true,
         },
         closeModal: {
             type: Function,
@@ -47,6 +47,10 @@ export default {
             required: true
         },
         notify: {
+            type: Function,
+            required: true
+        },
+        t: {
             type: Function,
             required: true
         }
@@ -73,13 +77,13 @@ export default {
                 this.deselectAll();
                 this.fetchData("no-notification");
                 this.notify({
-                    message: `Successfully deleted ${this.events.length} event(s).`,
+                    message: this.t('my_event_queue_tags.success') + " " + this.t('my_event_queue_tags.delete'),
                     type: 'success'
                 });
             } catch (err) {
                 console.error("Failed to delete event queues: ", err);
                 this.notify({
-                    message: `Failed to delete events: ${err.message}`,
+                    message: this.t('my_event_queue_tags.fail') + " " + this.t('my_event_queue_tags.delete') + ": " + err.message,
                     type: 'error'
                 });
             }
@@ -91,13 +95,13 @@ export default {
                 this.deselectAll();
                 this.fetchData("no-notification");
                 this.notify({
-                    message: `Successfully reset ${this.events.length} event${(this.events.length > 1 ? 's' : '')}.`,
+                    message: this.t('my_event_queue_tags.success') + " " + this.t('my_event_queue_tags.reset'),
                     type: 'success'
                 });
             } catch (err) {
                 console.error("Failed to reset event queues: ", err);
                 this.notify({
-                    message: `Failed to reset event(s): ${err.message}`,
+                    message: this.t('my_event_queue_tags.fail') + " " + this.t('my_event_queue_tags.reset') + ": " + err.message,
                     type: 'error'
                 });
             }

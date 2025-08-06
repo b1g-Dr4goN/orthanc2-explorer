@@ -123,14 +123,8 @@ export default {
                 if ((["osimis-web-viewer", "stone-webviewer", "volview", "wsi"].indexOf(viewer) != -1 && viewer in store.state.configuration.installedPlugins) ||
                     (viewer.startsWith("ohif") && viewer in store.state.configuration.installedPlugins) ||
                     (viewer.startsWith("ohif") && store.state.configuration.uiOptions.EnableOpenInOhifViewer3) ||
-<<<<<<< HEAD
-                    (viewer == "meddream" && store.state.configuration.uiOptions.EnableOpenInMedDreamViewer))
-                {
-                    return this.getViewerUrl(level, orthancId, dicomId, viewer);
-=======
                     (viewer == "meddream" && store.state.configuration.uiOptions.EnableOpenInMedDreamViewer)) {
                     return viewer;
->>>>>>> 789f4d4 (Reconfigured to use buttons on studies)
                 }
             }
         }

@@ -78,11 +78,7 @@
 import MyConfirmModal from "./MyConfirmModal.vue";
 import MyEventDetail from "./MyEventDetail.vue";
 import MyNotification from "./MyNotification.vue";
-<<<<<<< HEAD
-import myApi from "./myApi";
-=======
 import myApi from "./configs/myApi";
->>>>>>> 789f4d4 (Reconfigured to use buttons on studies)
 
 export default {
   components: {

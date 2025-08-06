@@ -1,5 +1,5 @@
-import store from "../store"
-import api from "../orthancApi"
+import store from "../../../store"
+import api from "../../../orthancApi"
 
 export default {
     getResourceTitle(resourceType, patientMainDicomTags, studyMainDicomTags, seriesMainDicomTags, instanceTags) {
@@ -42,11 +42,45 @@ export default {
                 transformedInstanceTags[v['Name']] = v['Value'];
             }
         }
-        
-        for (let levelTags of [patientMainDicomTags, studyMainDicomTags, seriesMainDicomTags, transformedInstanceTags]) {
-            if (levelTags != null) {
-                for (const [k, v] of Object.entries(levelTags)) {
-                    output = output.replace("{" + k + "}", v);
+
+        if (resourceLevel == "studies") {
+            const myPatientMainDicomTags = patientMainDicomTags ? patientMainDicomTags.reduce((acc, obj) => {
+                Object.keys(obj).forEach(key => {
+                    if (!acc[key]) acc[key] = [];
+                    acc[key].push(obj[key]);
+                });
+                return acc;
+            }, {}) : undefined;
+
+            const myStudyMainDicomTags = studyMainDicomTags ? studyMainDicomTags.reduce((acc, obj) => {
+                Object.keys(obj).forEach(key => {
+                    if (!acc[key]) acc[key] = [];
+                    acc[key].push(obj[key]);
+                });
+                return acc;
+            }, {}) : undefined;
+
+            const mySeriesMainDicomTags = seriesMainDicomTags ? seriesMainDicomTags.reduce((acc, obj) => {
+                Object.keys(obj).forEach(key => {
+                    if (!acc[key]) acc[key] = [];
+                    acc[key].push(obj[key]);
+                });
+                return acc;
+            }, {}) : undefined;
+
+            for (let levelTags of [myPatientMainDicomTags, myStudyMainDicomTags, mySeriesMainDicomTags, transformedInstanceTags]) {
+                if (levelTags != null) {
+                    for (const [k, v] of Object.entries(levelTags)) {
+                        output = output.replace("{" + k + "}", v);
+                    }
+                }
+            }
+        } else {
+            for (let levelTags of [patientMainDicomTags, studyMainDicomTags, seriesMainDicomTags, transformedInstanceTags]) {
+                if (levelTags != null) {
+                    for (const [k, v] of Object.entries(levelTags)) {
+                        output = output.replace("{" + k + "}", v);
+                    }
                 }
             }
         }
@@ -117,47 +151,39 @@ export default {
         }
     },
 
-    getPrimaryViewerUrl(level, orthancId, dicomId) {
+    getPrimaryViewer() {
         if (store.state.configuration.uiOptions.ViewersOrdering.length > 0) {
             for (let viewer of store.state.configuration.uiOptions.ViewersOrdering) {
                 if ((["osimis-web-viewer", "stone-webviewer", "volview", "wsi"].indexOf(viewer) != -1 && viewer in store.state.configuration.installedPlugins) ||
                     (viewer.startsWith("ohif") && viewer in store.state.configuration.installedPlugins) ||
                     (viewer.startsWith("ohif") && store.state.configuration.uiOptions.EnableOpenInOhifViewer3) ||
-<<<<<<< HEAD
-                    (viewer == "meddream" && store.state.configuration.uiOptions.EnableOpenInMedDreamViewer))
-                {
-                    return this.getViewerUrl(level, orthancId, dicomId, viewer);
-=======
                     (viewer == "meddream" && store.state.configuration.uiOptions.EnableOpenInMedDreamViewer)) {
                     return viewer;
->>>>>>> 789f4d4 (Reconfigured to use buttons on studies)
                 }
             }
         }
         return null;
+    },
+
+    getPrimaryViewerUrl(level, orthancId, dicomId) {
+        const viewer = this.getPrimaryViewer();
+        return this.getViewerUrl(level, orthancId, dicomId, viewer);
     },
 
     getPrimaryViewerTokenType() {
-        if (store.state.configuration.uiOptions.ViewersOrdering.length > 0) {
-            for (let viewer of store.state.configuration.uiOptions.ViewersOrdering) {
-                if (viewer == "meddream") {
-                    return "meddream-instant-link";
-                } else {
-                    return "viewer-instant-link";
-                }
-            }
+        const viewer = this.getPrimaryViewer();
+        if (viewer == "meddream") {
+            return "meddream-instant-link";
+        } else {
+            return "viewer-instant-link";
         }
-        return null;
     },
 
     getViewerUrl(level, orthancId, dicomId, viewer) {
-<<<<<<< HEAD
-=======
         if (!viewer) {
             return null;
         }
 
->>>>>>> 789f4d4 (Reconfigured to use buttons on studies)
         if (viewer == 'osimis-web-viewer') {
             return api.getOsimisViewerUrl(level, orthancId);
         } else if (viewer == 'stone-webviewer') {

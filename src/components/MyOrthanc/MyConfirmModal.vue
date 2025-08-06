@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import myApi from './myApi';
+import myApi from './configs/myApi';
 
 export default {
     name: 'MyConfirmModal',

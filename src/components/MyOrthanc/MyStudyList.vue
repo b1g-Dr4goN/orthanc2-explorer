@@ -1182,7 +1182,7 @@ button.form-control.study-list-filter {
   border-top: 0px !important;
 } */
 
-.study-table {}
+/* .study-table {} */
 
 .study-table> :nth-child(odd)>tr>td {
     background-color: var(--study-odd-bg-color);

@@ -52,7 +52,7 @@ export default {
             if (this.isFilter == true) {
                 return false;
             }
-            return this.uiOptions?.AvailableLabels?.length == 0; // if there is no AvailableLabels list, this means we can create any new label
+            return this.uiOptions.AvailableLabels.length == 0; // if there is no AvailableLabels list, this means we can create any new label
         },
         placeHolderText() {
             if (this.isFilter == true) {

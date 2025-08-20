@@ -62,10 +62,10 @@ export default {
         const matchStudyResourceToken = output.match(/\{study-resource-token\/(.*?)\}/);
         if (matchStudyResourceToken) {
             const tokenType = matchStudyResourceToken[1];
-            const resourceToken = await api.createToken({
-                tokenType: tokenType,
-                resourcesIds: [resourceId],
-                level: resourceLevel,
+            const resourceToken = await api.createToken({ 
+                tokenType: tokenType, 
+                resourcesIds: [resourceId], 
+                level: resourceLevel, 
                 validityDuration: store.state.configuration.tokens.InstantLinksValidity
             });
             output = output.replace('{study-resource-token/' + tokenType + '}', resourceToken['Token']);
@@ -79,7 +79,7 @@ export default {
             return null;
         }
         let output = {};
-
+        
         for (const [k, v] of Object.entries(template)) {
             if (typeof v === 'string') {
                 if (v.indexOf('{') != -1) {
@@ -107,8 +107,8 @@ export default {
         return output;
     },
 
-    patientNameCapture: "([^\\^]+)\\^?([^\\^]+)?\\^?([^\\^]+)?\\^?([^\\^]+)?\\^?([^\\^]+)?",
-    patientNameFormatting: null,
+    patientNameCapture : "([^\\^]+)\\^?([^\\^]+)?\\^?([^\\^]+)?\\^?([^\\^]+)?\\^?([^\\^]+)?",
+    patientNameFormatting : null,
     formatPatientName(originalPatientName) {
         if (originalPatientName && this.patientNameFormatting && this.patientNameCapture) {
             return originalPatientName.replace(new RegExp(this.patientNameCapture), this.patientNameFormatting);
@@ -123,7 +123,8 @@ export default {
                 if ((["osimis-web-viewer", "stone-webviewer", "volview", "wsi"].indexOf(viewer) != -1 && viewer in store.state.configuration.installedPlugins) ||
                     (viewer.startsWith("ohif") && viewer in store.state.configuration.installedPlugins) ||
                     (viewer.startsWith("ohif") && store.state.configuration.uiOptions.EnableOpenInOhifViewer3) ||
-                    (viewer == "meddream" && store.state.configuration.uiOptions.EnableOpenInMedDreamViewer)) {
+                    (viewer == "meddream" && store.state.configuration.uiOptions.EnableOpenInMedDreamViewer))
+                {
                     return viewer;
                 }
             }
@@ -149,7 +150,7 @@ export default {
         if (!viewer) {
             return null;
         }
-
+        
         if (viewer == 'osimis-web-viewer') {
             return api.getOsimisViewerUrl(level, orthancId);
         } else if (viewer == 'stone-webviewer') {

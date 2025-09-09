@@ -122,7 +122,7 @@ const actions = {
         const oe2Config = await api.loadOe2Configuration();
         commit('setUiOptions', { uiOptions: oe2Config['UiOptions']});
         commit('setTokens', { tokens: oe2Config['Tokens']});
-        commit('setAdvancedOptions', { advancedOptions: oe2Config['AdvancedOptions']});
+        commit('setAdvancedOptions', { advancedOptions: oe2Config['AdvancedOptions'] ?? {}});
 
         if ('Profile' in oe2Config) {
             commit('setUserProfile', { profile: oe2Config['Profile']});

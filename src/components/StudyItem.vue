@@ -118,7 +118,7 @@ export default {
             allLabels: state => state.labels.allLabels
         }),
         modalitiesInStudyForDisplay() {
-            if (this.study.RequestedTags.ModalitiesInStudy) {
+            if (this.study.RequestedTags?.ModalitiesInStudy) {
                 return this.study.RequestedTags.ModalitiesInStudy.split('\\').join(',');
             } else {
                 return "";
@@ -168,7 +168,7 @@ export default {
             return this.studiesSourceType == SourceType.LOCAL_ORTHANC && this.uiOptions.EnableReportQuickButton && !this.hasPdfReportIcon;
         },
         hasPdfReportIcon() {
-            return this.study.RequestedTags.SOPClassesInStudy && this.study.RequestedTags.SOPClassesInStudy.indexOf("1.2.840.10008.5.1.4.1.1.104.1") != -1 && this.uiOptions.EnableReportQuickButton;
+            return this.study.RequestedTags?.SOPClassesInStudy && this.study.RequestedTags?.SOPClassesInStudy.indexOf("1.2.840.10008.5.1.4.1.1.104.1") != -1 && this.uiOptions.EnableReportQuickButton;
         },
         hasPrimaryViewerIconPlaceholder() {
             return this.studiesSourceType == SourceType.LOCAL_ORTHANC && this.uiOptions.EnableViewerQuickButton && !this.hasPrimaryViewerIcon;

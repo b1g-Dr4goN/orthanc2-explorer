@@ -71,7 +71,7 @@ export default {
             for (let levelTags of [myPatientMainDicomTags, myStudyMainDicomTags, mySeriesMainDicomTags, transformedInstanceTags]) {
                 if (levelTags != null) {
                     for (const [k, v] of Object.entries(levelTags)) {
-                        output = output.replace("{" + k + "}", v);
+                        output = output?.replace("{" + k + "}", v);
                     }
                 }
             }
@@ -79,14 +79,14 @@ export default {
             for (let levelTags of [patientMainDicomTags, studyMainDicomTags, seriesMainDicomTags, transformedInstanceTags]) {
                 if (levelTags != null) {
                     for (const [k, v] of Object.entries(levelTags)) {
-                        output = output.replace("{" + k + "}", v);
+                        output = output?.replace("{" + k + "}", v);
                     }
                 }
             }
         }
 
-        output = output.replace("{UUID}", resourceId);
-        output = output.replace(/{[^}]+}/g, 'undefined');
+        output = output?.replace("{UUID}", resourceId);
+        output = output?.replace(/{[^}]+}/g, 'undefined');
         return output;
     },
 

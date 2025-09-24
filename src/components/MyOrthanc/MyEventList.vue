@@ -20,8 +20,8 @@
             </button>
           </th>
           <th v-for="field in fields" :key="field.fieldName">
-            <input v-model="filters[fieldMappings[field.fieldName]]" :placeholder="field.placeholder"
-              @keyup.enter="search" />
+            <input v-if="field.isSearchable" v-model="filters[fieldMappings[field.fieldName]]"
+              :placeholder="field.placeholder" @keyup.enter="search" />
           </th>
         </tr>
         <!-- Operations row -->
@@ -34,7 +34,8 @@
           </td>
           <td :colspan="fields.length" class="operation-buttons">
             <!-- Add your operation buttons here -->
-            <button :title="$t('my_event_queue_tags.reload')" @click="fetchData('notify')" class="buttons bi bi-arrow-clockwise"></button>
+            <button :title="$t('my_event_queue_tags.reload')" @click="fetchData('notify')"
+              class="buttons bi bi-arrow-clockwise"></button>
             <button :title="$t('my_event_queue_tags.reset')" @click="handleResetSelectedEvents('many')"
               :disabled="selectedEvents.length === 0" class="buttons bi bi-arrow-repeat"></button>
             <button :title="$t('my_event_queue_tags.delete')" @click="handleDeleteSelectedEvents('many')"
@@ -46,21 +47,22 @@
       <tbody>
         <template v-for="row in filteredData" :key="row.id">
           <!-- Main Row -->
-          <tr :class="'event-table-row ' + (showEventsDetails.includes(row.id) ? 'show-event-details' : '')"
+          <tr v-if="row.id"
+            :class="'event-table-row ' + (showEventsDetails.includes(row.id) ? 'show-event-details' : '')"
             @click="setShowEventDetails(row.id)">
             <td>
               <input type="checkbox" v-model="selectedEvents" :value="row.id" @click.stop />
             </td>
             <td v-for="field in fields" :key="field.fieldName" :title="row[fieldMappings[field.fieldName]]">
-              {{ field.fieldName.includes("Time") ? formatTimestamp(row[fieldMappings[field.fieldName]]) :
-                row[fieldMappings[field.fieldName]] }}
+              {{ row[fieldMappings[field.fieldName]] }}
             </td>
           </tr>
 
           <!-- Detail Row -->
           <tr v-if="showEventsDetails.includes(row.id)">
             <td :colspan="fields.length + 1" class="event-detail-row">
-              <MyEventDetail :eventDetails="row" :handleDeleteEvent="handleDeleteSelectedEvents"
+              <MyEventDetail v-if="eventDetailsMap[row.id]" :eventDetails="eventDetailsMap[row.id]"
+                :handleUpdateEvent="handleUpdateSelectedEvent" :handleDeleteEvent="handleDeleteSelectedEvents"
                 :handleResetEvent="handleResetSelectedEvents" />
             </td>
           </tr>
@@ -89,15 +91,15 @@ export default {
   data() {
     return {
       fields: [
-        { fieldName: "id", width: "5%", placeholder: "1234", isOrderable: true },
-        { fieldName: "app_id", width: "5%", placeholder: "ABCD1234", isOrderable: false },
-        { fieldName: "creation_time", width: "7%", placeholder: "YYYYDDMMTHHMMSS", isOrderable: true },
-        { fieldName: "last_updated_time", width: "7%", placeholder: "YYYYDDMMTHHMMSS", isOrderable: true },
-        { fieldName: "iuid", width: "13%", placeholder: "1.23.456", isOrderable: false },
-        { fieldName: "resource_id", width: "13%", placeholder: "abcd-1234", isOrderable: false },
-        { fieldName: "resource_type", width: "5%", placeholder: "Study", isOrderable: false },
-        { fieldName: "delay_sec", width: "4%", placeholder: "1234", isOrderable: true },
-        { fieldName: "retry", width: "3%", placeholder: "1234", isOrderable: true },
+        { fieldName: "id", width: "5%", placeholder: "1234", isOrderable: true, isSearchable: false },
+        { fieldName: "app_id", width: "5%", placeholder: "ABCD1234", isOrderable: false, isSearchable: true },
+        { fieldName: "creation_time", width: "7%", placeholder: "YYYYDDMMTHHMMSS", isOrderable: true, isSearchable: false },
+        { fieldName: "last_updated_time", width: "7%", placeholder: "YYYYDDMMTHHMMSS", isOrderable: true, isSearchable: false },
+        { fieldName: "iuid", width: "13%", placeholder: "1.23.456", isOrderable: false, isSearchable: false },
+        { fieldName: "resource_id", width: "13%", placeholder: "abcd-1234", isOrderable: false, isSearchable: false },
+        { fieldName: "resource_type", width: "5%", placeholder: "Study", isOrderable: false, isSearchable: true },
+        { fieldName: "delay_sec", width: "4%", placeholder: "1234", isOrderable: true, isSearchable: false },
+        { fieldName: "retry", width: "3%", placeholder: "1234", isOrderable: true, isSearchable: false },
       ],
       fieldMappings: {
         "id": "id",
@@ -110,6 +112,17 @@ export default {
         "resource_type": "resourceType",
         "retry": "retry",
       },
+      paramsMappings: {
+        "id": "ID",
+        "app_id": "AppID",
+        "creationTime": "CreationTime",
+        "delaySec": "DelaySec",
+        "iuid": "IUID",
+        "lastUpdatedTime": "LastUpdatedTime",
+        "resourceId": "ResourceID",
+        "resourceType": "ResourceType",
+        "retry": "Retry",
+      },
       filters: {
         app_id: '',
         creation_time: '',
@@ -117,7 +130,6 @@ export default {
         id: '',
         iuid: '',
         last_updated_time: '',
-        now: '',
         resource_id: '',
         resource_type: '',
         retry: ''
@@ -127,6 +139,7 @@ export default {
       selectedEvents: [], // Stores selected event IDs
       selectAll: false, // Flag to control the "Select All" checkbox
       showEventsDetails: [],
+      eventDetailsMap: {},
       showConfirmModal: false,
       confirmText: this.$t('my_event_queue_tags.confirm'),
       cancelText: this.$t('my_event_queue_tags.cancel'),
@@ -163,24 +176,50 @@ export default {
         }
       }
     },
-    search() {
-      this.filteredData = this.data.filter(row => {
-        return Object.keys(this.filters).every(key => {
-          if (!this.filters[key]) return true;
-          const fieldValue = row[key];
-          return fieldValue && fieldValue.toString().toLowerCase().includes(this.filters[key].toLowerCase());
+    async search() {
+      try {
+        const params = {};
+        for (const key in this.filters) {
+          if (this.filters[key]) {
+            console.log(this.paramsMappings[key]);
+            console.log(this.filters[key])
+            params[this.paramsMappings[key]] = this.filters[key];
+          }
+        }
+        const response = await myApi.getEventQueues(params);
+        this.filteredData = response.events || response;
+        this.notify({
+          message: this.$t('my_event_queue_tags.search') + " " + this.$t('my_event_queue_tags.success'),
+          type: 'success'
         });
-      });
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+        this.notify({
+          message: `Failed to load event queue: ${error.message}`,
+          type: 'error'
+        });
+      }
     },
-    setShowEventDetails(eventId) {
-      const check = this.showEventsDetails.some(id => id === eventId);
-      // console.log("check", check);
-      // console.log("eventId", eventId);
-      // console.log("showEventsDetails", this.showEventsDetails);
-      if (check) {
-        this.showEventsDetails.splice(this.showEventsDetails.findIndex(id => id === eventId), 1); // Remove eventId from the array
+    async setShowEventDetails(eventId) {
+      const index = this.showEventsDetails.indexOf(eventId);
+
+      if (index !== -1) {
+        this.showEventsDetails.splice(index, 1);
       } else {
-        this.showEventsDetails.push(eventId); // Add eventId to the array
+        this.showEventsDetails.push(eventId);
+
+        if (!this.eventDetailsMap[eventId]) {
+          try {
+            const detail = await myApi.getEventQueue(eventId);
+            this.eventDetailsMap[eventId] = detail;
+          } catch (err) {
+            console.error("Failed to fetch event detail:", err);
+            this.notify({
+              message: `Failed to load event #${eventId}: ${err.message}`,
+              type: "error"
+            });
+          }
+        }
       }
     },
     toggleSelectAll() {
@@ -208,6 +247,11 @@ export default {
       this.action = "reset";
       this.handleOpenModal();
     },
+    handleUpdateSelectedEvent(src) {
+      this.actionType = src;
+      this.action = "update";
+      this.handleOpenModal();
+    },
     handleDeselectAll() {
       this.selectedEvents = [];
       this.selectAll = false;
@@ -226,29 +270,8 @@ export default {
         this.notification = { message, type };
       });
     },
-    formatTimestamp(timestamp) {
-      // Check if timestamp exists and is a valid length (14 chars)
-      if (timestamp && timestamp.length === 15) {
-        const year = timestamp.slice(0, 4);
-        const month = timestamp.slice(4, 6);
-        const day = timestamp.slice(6, 8);
-        const hour = timestamp.slice(9, 11);
-        const minute = timestamp.slice(11, 13);
-        const second = timestamp.slice(13, 15);
-
-        // Return the formatted date in DD/MM/YYYY - HH:MM:SS format
-        return `${day}/${month}/${year} - ${hour}:${minute}:${second}`;
-      }
-      return ''; // Return an empty string if timestamp is invalid
-    },
   },
   watch: {
-    filters: {
-      handler() {
-        this.search();
-      },
-      deep: true
-    },
     selectedEvents() {
       this.selectAll = this.selectedEvents.length === this.filteredData.length;
     }
@@ -262,45 +285,35 @@ export default {
 </script>
 
 <style scoped>
-/* General table styles */
 .event-table {
   width: 100%;
   border-collapse: collapse;
   background-color: #fff;
   table-layout: fixed;
-  /* Ensures fixed column width */
 }
 
 .event-table th {
-  padding: 8px;
+  padding: 5px;
   text-align: left;
   border-bottom: 1px solid #ddd;
   background-color: #bebebe;
-  /* Changed to gray for header */
   font-weight: bold;
   white-space: normal;
-  /* Allow text to wrap in header */
   word-wrap: break-word;
-  /* Ensure long words break if necessary */
 }
 
 .event-table td {
-  padding: 8px;
+  padding: 3px;
   text-align: left;
   border-bottom: 1px solid #ddd;
   white-space: nowrap;
-  /* Prevent text from wrapping in cell */
   overflow: hidden;
-  /* Hide overflowed content */
   text-overflow: ellipsis;
-  /* Show ellipsis for overflowed text */
   max-width: 200px;
-  /* Optional: adjust width as necessary */
 }
 
 .event-table th {
-  background-color: #bebebe;
-  /* Darker gray for header */
+  background-color: var(--study-table-actions-bg-color);
   font-weight: bold;
   font-size: 14px;
 }
@@ -320,55 +333,49 @@ export default {
   border-color: #007bff;
 }
 
-/* Odd rows background color */
+.event-table-operations>td {
+  background-color: var(--study-table-actions-bg-color);
+}
+
 .event-table>tbody>tr:nth-child(odd)>td {
   background-color: var(--study-odd-bg-color);
-  /* Custom variable for odd row color */
 }
 
-/* Even rows background color */
 .event-table>tbody>tr:nth-child(even)>td {
   background-color: var(--study-even-bg-color);
-  /* Custom variable for even row color */
 }
 
-/* Prevent hover effect on the first row of tbody (header row) */
 .event-table>tbody>.event-table-row:hover>* {
   background-color: var(--study-hover-color);
-  /* Custom variable for hover color */
 }
 
-/* Add styling for the first checkbox column */
 .event-table th:first-child,
 .event-table td:first-child {
   width: 5%;
-  /* Adjust the width of the checkbox column */
   text-align: center;
 }
 
-/* Style for operation buttons */
 button {
   margin-right: 10px;
-  padding: 12px 17px;
-  background-color: #007bff;
+  padding: 6px 10px;
+  background-color: #6c757d;
   color: white;
   border: none;
   border-radius: 4px;
 }
 
 button:hover {
-  background-color: #006adb;
+  background-color: #5c636a;
 }
 
 button:active {
-  background-color: #005ec2;
+  background-color: #565e64;
 }
 
 button:disabled {
-  background-color: #ccc;
+  background-color: #a2a9af;
 }
 
-/* Style for the "Clear Filters" button */
 .clear-filters-btn {
   background-color: #fff;
   color: black;
@@ -409,7 +416,6 @@ button:disabled {
   }
 }
 
-/* Add focus effect for input fields */
 .event-table-filters input:focus {
   border-color: #007bff;
   box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
@@ -467,6 +473,5 @@ thead {
   top: 0;
   z-index: 1;
   box-shadow: inset 0 -1px 0 #ccc;
-  border-bottom: 2px solid #b8b6b6;
 }
 </style>

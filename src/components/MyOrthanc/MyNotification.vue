@@ -41,8 +41,9 @@ export default {
 <style scoped>
 .notification {
   float: right;
-  padding: 12px 20px;
+  padding: 6px 10px;
   margin: 0;
+  margin-right: 36px;
   border-radius: 6px;
   font-size: 16px;
   color: #fff;

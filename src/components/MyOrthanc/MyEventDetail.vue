@@ -1,41 +1,68 @@
 <template>
     <div>
         <div class="event-detail-container">
-            <div class="event-detail-header"><strong>{{ $t('my_event_queue_tags.details') + " " + $t('my_event_queue_tags.event') + " #" + eventDetails[fieldMappings["id"]] }}</strong>
+            <div class="event-detail-header"><strong>{{ $t('my_event_queue_tags.details') + " " +
+                $t('my_event_queue_tags.event') + " #" + eventDetails[fieldMappings["id"]] }}</strong>
             </div>
-            <div class="event-detail-content">
-                <!-- Event Details Column -->
-                <div class="event-detail-column event-details" style="width: 68%;">
-                    <div class="event-detail-row" v-for="(field, i) in fields" :key="i">
-                        <div class="event-detail-field">
-                            <strong>{{ $t('my_event_queue_tags.' + field.fieldName) }}:&nbsp;</strong>
-                            <div class="event-detail-label">
-                                {{ field.fieldName.includes("time") ?
-                                    formatTimestamp(eventDetails[fieldMappings?.[field.fieldName]]) :
-                                    eventDetails[fieldMappings[field.fieldName]] }}
-                            </div>
-                            <div>
-                                <CopyToClipboardButton
-                                    v-if="eventDetails[fieldMappings[field.fieldName]] && eventDetails[fieldMappings[field.fieldName]].toString().length > 0"
-                                    :valueToCopy="eventDetails[fieldMappings[field.fieldName]]" />
+            <div class="event-detail">
+                <div class="event-detail-content">
+                    <div class="event-detail-column event-details">
+                        <div class="event-detail-row" v-for="(field, i) in fields" :key="i">
+                            <div class="event-detail-field">
+                                <strong class="event-detail-title">
+                                    {{ $t('my_event_queue_tags.' + field.fieldName) }}:&nbsp;
+                                </strong>
+                                <div class="event-detail-label" :title="eventDetails[fieldMappings[field.fieldName]]">
+                                    {{ eventDetails[fieldMappings[field.fieldName]] }}
+                                </div>
+                                <div>
+                                    <CopyToClipboardButton
+                                        v-if="eventDetails[fieldMappings[field.fieldName]] && eventDetails[fieldMappings[field.fieldName]].toString().length > 0"
+                                        :valueToCopy="eventDetails[fieldMappings[field.fieldName]]" />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Operations Column (for buttons) -->
                 <div class="event-detail-column operations" style="width: 32%;">
                     <div class="operations-content">
-                        <!-- Here you can add buttons or any other event operations -->
-                        <div class="operation-placeholder">
+                        <div class="operation-placeholder-title">
                             <strong>Operations</strong>
-                            <!-- Placeholder for buttons or operations -->
-                            <button :title="$t('my_event_queue_tags.reset')" @click="handleResetEvent(`[${this.eventDetails.id}]`)" class="buttons bi bi-arrow-repeat"></button>
-                            <button :title="$t('my_event_queue_tags.delete')" @click="handleDeleteEvent(`[${this.eventDetails.id}]`)" class="buttons bi bi-trash"></button>
+                            <div class="operation-placeholder">
+                                <button :title="$t('my_event_queue_tags.reset')"
+                                    @click="handleResetEvent(`[${this.eventDetails.id}]`)"
+                                    class="buttons bi bi-arrow-repeat"></button>
+                                <button :title="$t('my_event_queue_tags.update')"
+                                    @click="handleUpdateEvent(`[${this.eventDetails.id}]`)"
+                                    class="buttons bi bi-file-earmark-arrow-up"></button>
+                                <button :title="$t('my_event_queue_tags.delete')"
+                                    @click="handleDeleteEvent(`[${this.eventDetails.id}]`)"
+                                    class="buttons bi bi-trash"></button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <table class="event-jobs-table">
+                <thead>
+                    <tr class="event-jobs-table-headers">
+                        <th v-for="field in jobFields" :key="field.fieldName" :style="{ width: field.width }">
+                            {{ field.fieldName }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="event-jobs-table-body" v-for="job in jobs" :key="job.id">
+                        <td v-for="field in jobFields" :key="field.name" :title="job[field.name]">
+                            {{ job[field.name] }}
+                            <CopyToClipboardButton v-if="job[field.name] && job[field.name].toString().length > 0"
+                                :valueToCopy="job[field.name]" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </template>
@@ -60,6 +87,10 @@ export default {
             type: Function,
             required: true
         },
+        handleUpdateEvent: {
+            type: Function,
+            required: true
+        }
     },
     data() {
         return {
@@ -89,80 +120,117 @@ export default {
                 "resource_type": "resourceType",
                 "retry": "retry",
             },
+            jobFields: [
+                { "fieldName": "Job ID", "name": "id" },
+                { "fieldName": "Creation Time", "name": "creationTime" },
+                { "fieldName": "Last Updated Time", "name": "lastUpdatedTime" },
+            ],
+            jobs: this.eventDetails.jobs ?? [],
         };
     },
-    methods: {
-        formatTimestamp(timestamp) {
-            // Check if timestamp exists and is a valid length (14 chars)
-            if (timestamp && timestamp.length === 15) {
-                const year = timestamp.slice(0, 4);
-                const month = timestamp.slice(4, 6);
-                const day = timestamp.slice(6, 8);
-                const hour = timestamp.slice(9, 11);
-                const minute = timestamp.slice(11, 13);
-                const second = timestamp.slice(13, 15);
-
-                // Return the formatted date in DD/MM/YYYY - HH:MM:SS format
-                return `${day}/${month}/${year} - ${hour}:${minute}:${second}`;
-            }
-            return ''; // Return an empty string if timestamp is invalid
-        },
-    }
 }
 </script>
 
 <style scoped>
+.event-detail {
+    padding: 0 28px;
+    font-size: 14px;
+    display: flex;
+    flex-direction: col;
+    gap: 10px;
+}
+
 .event-detail-content {
     display: flex;
     flex-direction: row;
-    gap: 2rem;
+    gap: 10px;
 }
 
 .event-detail-column {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 10px;
 }
 
 .event-detail-row {
-    margin-bottom: 0.75rem;
+    margin-top: auto;
+    margin-bottom: auto;
 }
 
 .event-detail-field {
     text-align: justify;
     line-height: 1.4;
     word-break: break-word;
+    padding: 2px 12px;
     display: flex;
     flex-direction: row;
+}
+
+.event-detail-title {
+    margin-top: auto;
+    margin-bottom: auto;
 }
 
 .event-detail-label {
     overflow: hidden;
     text-overflow: ellipsis;
     margin-left: auto !important;
+    margin-top: auto;
+    margin-bottom: auto;
 }
 
-.event-detail-field-name {
-    font-weight: bold;
-    width: 50%;
+.event-jobs-table {
+    background-color: white;
+    width: 88%;
+    font-size: 14px;
+    margin: 6px auto 16px auto;
 }
 
-.event-detail-field-value {
-    width: 50%;
+.event-jobs-table-headers {
+    background-color: #cccccc;
 }
 
-/* Operations Column */
+.event-jobs-table-body {
+    border-top: 1px solid rgb(108, 108, 108);
+}
+
+.event-jobs-table-body td {
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+:hover.event-jobs-table-body {
+    background-color: var(--study-selected-color);
+}
+
 .operations {
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
-/* Styling for placeholder operations section */
 .operation-placeholder {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    background-color: #f4f4f4;
+    padding: 1rem;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    height: 100%;
+    width: fit-content;
+    align-items: center;
+    justify-items: center;
+    justify-self: center;
+}
+
+.operation-placeholder-title {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    background-color: #f4f4f4;
+    background-color: #cccccc;
     padding: 1rem;
     text-align: center;
     border: 1px solid #ddd;

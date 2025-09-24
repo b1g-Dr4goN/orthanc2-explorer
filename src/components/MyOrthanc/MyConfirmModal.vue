@@ -67,6 +67,8 @@ export default {
                 this.deleteSelectedEvents();
             } else if (this.action === 'reset') {
                 this.resetSelectedEvents();
+            } else if (this.action === 'update') {
+                this.updateSelectedEvents();
             }
             this.closeModal();
         },
@@ -92,6 +94,24 @@ export default {
             // Handle reset logic
             try {
                 const response = await myApi.resetEventQueues(this.events);
+                this.deselectAll();
+                this.fetchData("no-notification");
+                this.notify({
+                    message: this.t('my_event_queue_tags.success') + " " + this.t('my_event_queue_tags.update'),
+                    type: 'success'
+                });
+            } catch (err) {
+                console.error("Failed to update event queues: ", err);
+                this.notify({
+                    message: this.t('my_event_queue_tags.fail') + " " + this.t('my_event_queue_tags.update') + ": " + err.message,
+                    type: 'error'
+                });
+            }
+        },
+        async updateSelectedEvents() {
+            // Handle update logic
+            try {
+                const response = await myApi.updateEventQueue(this.events, this.events);
                 this.deselectAll();
                 this.fetchData("no-notification");
                 this.notify({

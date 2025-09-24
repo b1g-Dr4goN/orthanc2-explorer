@@ -150,7 +150,9 @@
         "resource_id": "Resource ID",
         "resource_type": "Resource Type",
         "retry": "Retry",
-        "success": "Successfully"
+        "success": "Successfully",
+        "search": "Search Event(s)",
+        "update": "Update Event(s)"
     },
     "my_local_studies": "My local Studies",
     "my_orthanc_menu": "My Orthanc Menu",

@@ -4,18 +4,14 @@
       <thead>
         <!-- Select All Checkbox in the search row -->
         <tr class="event-table-headers">
-          <th>
-            <input type="checkbox" v-model="selectAll" @change="toggleSelectAll" :indeterminate="isIndeterminate" />
-          </th>
+          <th />
           <th v-for="field in fields" :key="field.fieldName" :style="{ width: field.width }">
             {{ $t('my_event_queue_tags.' + field.fieldName) }}
           </th>
         </tr>
-        <!-- Filters row -->
         <tr class="event-table-filters">
           <th>
             <button @click="clearFilters" class="clear-filters-btn">
-              <!-- Clear Filters -->
               <i class="bi bi-x-circle"></i>
             </button>
           </th>
@@ -24,16 +20,11 @@
               :placeholder="field.placeholder" @keyup.enter="search" />
           </th>
         </tr>
-        <!-- Operations row -->
         <tr class="event-table-operations">
-          <td class="selected-count" :colspan="1">
-            <div>
-              <p><strong>{{ $t('my_event_queue_tags.count') }}</strong></p>
-              <p>{{ selectedEvents ? selectedEvents.length : 0 }}</p>
-            </div>
+          <td :colspan="1">
+            <input id="select-all" type="checkbox" v-model="selectAll" @change="toggleSelectAll" :indeterminate="isIndeterminate" />
           </td>
           <td :colspan="fields.length" class="operation-buttons">
-            <!-- Add your operation buttons here -->
             <button :title="$t('my_event_queue_tags.reload')" @click="fetchData('notify')"
               class="buttons bi bi-arrow-clockwise"></button>
             <button :title="$t('my_event_queue_tags.reset')" @click="handleResetSelectedEvents('many')"
@@ -357,7 +348,8 @@ export default {
 
 button {
   margin-right: 10px;
-  padding: 6px 10px;
+  margin-bottom: 5px;
+  padding: 4px 8px;
   background-color: #6c757d;
   color: white;
   border: none;
@@ -451,11 +443,6 @@ button:disabled {
 .event-table .event-detail-row {
   background-color: var(--study-selected-color) !important;
   border-bottom: 3px solid black !important;
-}
-
-.selected-count>div>p {
-  margin: 0;
-  padding: 0;
 }
 
 .operation-buttons {

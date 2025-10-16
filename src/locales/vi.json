@@ -134,7 +134,8 @@
         "resource_id": "ID tài nguyên",
         "resource_type": "Kiểu tài nguyên",
         "retry": "Số lượt thử",
-        "success": "Thành công"
+        "success": "Thành công",
+        "update": "Chỉnh sửa sự kiện"
     },
     "my_local_studies": "Các phiên chụp nội bộ",
     "my_orthanc_menu": "Danh mục Orthanc nội bộ",

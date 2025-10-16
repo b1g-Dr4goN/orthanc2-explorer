@@ -6,7 +6,7 @@
             </div>
             <div class="event-detail">
                 <div class="event-detail-content">
-                    <div class="event-detail-column event-details">
+                    <div class="event-detail-column">
                         <div class="event-detail-row" v-for="(field, i) in fields" :key="i">
                             <div class="event-detail-field">
                                 <strong class="event-detail-title">
@@ -25,23 +25,59 @@
                     </div>
                 </div>
 
-                <div class="event-detail-column operations" style="width: 32%;">
-                    <div class="operations-content">
-                        <div class="operation-placeholder-title">
-                            <strong>Operations</strong>
-                            <div class="operation-placeholder">
-                                <button :title="$t('my_event_queue_tags.reset')"
-                                    @click="handleResetEvent(`[${this.eventDetails.id}]`)"
-                                    class="buttons bi bi-arrow-repeat"></button>
-                                <button :title="$t('my_event_queue_tags.update')"
-                                    @click="handleUpdateEvent(`[${this.eventDetails.id}]`)"
-                                    class="buttons bi bi-file-earmark-arrow-up"></button>
-                                <button :title="$t('my_event_queue_tags.delete')"
-                                    @click="handleDeleteEvent(`[${this.eventDetails.id}]`)"
-                                    class="buttons bi bi-trash"></button>
-                            </div>
-                        </div>
-                    </div>
+                <div class="operations" style="width: 26%;">
+                    <button :title="$t('my_event_queue_tags.reset')"
+                        @click="handleResetEvent(`[${this.eventDetails.id}]`)"
+                        class="btn btn-lg btn-secondary m-1 bi bi-arrow-repeat"></button>
+                    <button :title="$t('my_event_queue_tags.update')"
+                        @click="handleUpdateEvent(`[${this.eventDetails.id}]`)"
+                        class="btn btn-lg btn-secondary m-1 bi bi-pencil"></button>
+                    <button :title="$t('my_event_queue_tags.delete')"
+                        @click="handleDeleteEvent(`[${this.eventDetails.id}]`)"
+                        class="btn btn-lg btn-secondary m-1 bi bi-trash"></button>
+                    <button class="dropdown btn btn-lg btn-secondary m-1 dropdown-toggle" type="button"
+                        id="apiDropdownMenuId" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span data-bs-toggle="tooltip" title="API">
+                            <i class="bi bi-code-slash"></i>
+                        </span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="apiDropdownMenuId">
+                        <li>
+                            <button class="dropdown-item" href="#" @click="copyIdToClipboard">{{ $t('copy_orthanc_id')
+                            }}</button>
+                        </li>
+                        <li>
+                            <TokenLinkButton :linkType="'dropdown-item'" :level="this.eventDetails.resource_type"
+                                :linkUrl="getApiUrl('')" :resourcesOrthancId="[this.eventDetails.resource_id]"
+                                :title="'/'" :tokenType="'download-instant-link'" :opensInNewTab="true">
+                            </TokenLinkButton>
+                        </li>
+                        <li v-if="this.eventDetails.resource_type == 'instance'">
+                            <TokenLinkButton :linkType="'dropdown-item'" :level="this.eventDetails.resource_type"
+                                :linkUrl="getApiUrl('/tags?simplify')" :resourcesOrthancId="[this.eventDetails.resource_id]"
+                                :title="'/tags?simplify'" :tokenType="'download-instant-link'" :opensInNewTab="true">
+                            </TokenLinkButton>
+                        </li>
+                        <li>
+                            <TokenLinkButton :linkType="'dropdown-item'" :level="this.eventDetails.resource_type"
+                                :linkUrl="getApiUrl('/metadata?expand')" :resourcesOrthancId="[this.eventDetails.resource_id]"
+                                :title="'/metadata?expand'" :tokenType="'download-instant-link'" :opensInNewTab="true">
+                            </TokenLinkButton>
+                        </li>
+                        <li>
+                            <TokenLinkButton :linkType="'dropdown-item'" :level="this.eventDetails.resource_type"
+                                :linkUrl="getApiUrl('/statistics')" :resourcesOrthancId="[this.eventDetails.resource_id]"
+                                :title="'/statistics'" :tokenType="'download-instant-link'" :opensInNewTab="true">
+                            </TokenLinkButton>
+                        </li>
+                        <li>
+                            <TokenLinkButton :linkType="'dropdown-item'" :level="this.eventDetails.resource_type"
+                                :linkUrl="getApiUrl('/attachments?expand')" :resourcesOrthancId="[this.eventDetails.resource_id]"
+                                :title="'/attachments?expand'" :tokenType="'download-instant-link'"
+                                :opensInNewTab="true">
+                            </TokenLinkButton>
+                        </li>
+                    </ul>
                 </div>
             </div>
 
@@ -69,10 +105,14 @@
 
 <script>
 import CopyToClipboardButton from '../CopyToClipboardButton.vue';
+import TokenLinkButton from '../TokenLinkButton.vue';
+import api from "../../orthancApi";
+import clipboardHelpers from "../../helpers/clipboard-helpers";
 
 export default {
     components: {
         CopyToClipboardButton,
+        TokenLinkButton,
     },
     props: {
         eventDetails: {
@@ -128,6 +168,14 @@ export default {
             jobs: this.eventDetails.jobs ?? [],
         };
     },
+    methods: {
+        copyIdToClipboard() {
+            clipboardHelpers.copyToClipboard(this.eventDetails.resource_id);
+        },
+        getApiUrl(subRoute) {
+            return api.getApiUrl(this.eventDetails.resource_type, this.eventDetails.resource_id, subRoute);
+        },
+    }
 }
 </script>
 
@@ -143,10 +191,12 @@ export default {
 .event-detail-content {
     display: flex;
     flex-direction: row;
+    width: 100%;
     gap: 10px;
 }
 
 .event-detail-column {
+    width: 100%;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     padding: 10px;
@@ -205,50 +255,10 @@ export default {
 }
 
 .operations {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.operation-placeholder {
+    height: fit-content;
     display: flex;
     flex-direction: row;
-    gap: 1rem;
-    background-color: #f4f4f4;
-    padding: 1rem;
-    text-align: center;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    height: 100%;
-    width: fit-content;
-    align-items: center;
-    justify-items: center;
-    justify-self: center;
-}
-
-.operation-placeholder-title {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    background-color: #cccccc;
-    padding: 1rem;
-    text-align: center;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    height: 100%;
-    width: fit-content;
-    align-items: center;
-    justify-items: center;
-    justify-self: center;
-}
-
-.buttons {
-    width: 50px;
-    height: 50px;
-    border: none;
-    background-color: gray;
-    color: white;
-    border-radius: 5px;
+    flex-wrap: wrap;
 }
 
 :hover.buttons {

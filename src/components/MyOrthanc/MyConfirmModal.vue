@@ -97,24 +97,6 @@ export default {
                 this.deselectAll();
                 this.fetchData("no-notification");
                 this.notify({
-                    message: this.t('my_event_queue_tags.success') + " " + this.t('my_event_queue_tags.update'),
-                    type: 'success'
-                });
-            } catch (err) {
-                console.error("Failed to update event queues: ", err);
-                this.notify({
-                    message: this.t('my_event_queue_tags.fail') + " " + this.t('my_event_queue_tags.update') + ": " + err.message,
-                    type: 'error'
-                });
-            }
-        },
-        async updateSelectedEvents() {
-            // Handle update logic
-            try {
-                const response = await myApi.updateEventQueue(this.events, this.events);
-                this.deselectAll();
-                this.fetchData("no-notification");
-                this.notify({
                     message: this.t('my_event_queue_tags.success') + " " + this.t('my_event_queue_tags.reset'),
                     type: 'success'
                 });
@@ -122,6 +104,23 @@ export default {
                 console.error("Failed to reset event queues: ", err);
                 this.notify({
                     message: this.t('my_event_queue_tags.fail') + " " + this.t('my_event_queue_tags.reset') + ": " + err.message,
+                    type: 'error'
+                });
+            }
+        },
+        async updateSelectedEvents() {
+            try {
+                const response = await myApi.updateEventQueue(this.events, this.events);
+                this.deselectAll();
+                this.fetchData("no-notification");
+                this.notify({
+                    message: this.t('my_event_queue_tags.success') + " " + this.t('my_event_queue_tags.update'),
+                    type: 'success'
+                });
+            } catch (err) {
+                console.error("Failed to reset event queues: ", err);
+                this.notify({
+                    message: this.t('my_event_queue_tags.fail') + " " + this.t('my_event_queue_tags.update') + ": " + err.message,
                     type: 'error'
                 });
             }

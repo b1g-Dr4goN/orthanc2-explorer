@@ -17,7 +17,7 @@ export default {
     },
     duration: {
       type: Number,
-      default: 3000, // auto-dismiss after 3 seconds
+      default: 2000,
     }
   },
   data() {

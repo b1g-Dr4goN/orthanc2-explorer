@@ -6,7 +6,7 @@ export default {
         return (await axios.get(myOrthancApi + "/event-queues", { params })).data;
     },
     async getEventQueue(id) {
-        return (await axios.get(myOrthancApi + `/event-queue/${id}`)).data;
+        return (await axios.get(myOrthancApi + `/event-queues/${id}`)).data;
     },
     async updateEventQueue(id, event) {
         return (await axios.post(myOrthancApi + `/update-event-queue/${id}`, event));

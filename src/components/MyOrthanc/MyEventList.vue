@@ -2,7 +2,6 @@
   <div>
     <table class="event-table table table-sm">
       <thead>
-        <!-- Select All Checkbox in the search row -->
         <tr class="event-table-headers">
           <th />
           <th v-for="field in fields" :key="field.fieldName" :style="{ width: field.width }">
@@ -125,10 +124,10 @@ export default {
         resource_type: '',
         retry: ''
       },
-      data: [], // Replace with actual data fetching logic
+      data: [],
       filteredData: [],
-      selectedEvents: [], // Stores selected event IDs
-      selectAll: false, // Flag to control the "Select All" checkbox
+      selectedEvents: [],
+      selectAll: false,
       showEventsDetails: [],
       eventDetailsMap: {},
       showConfirmModal: false,
@@ -202,7 +201,7 @@ export default {
         if (!this.eventDetailsMap[eventId]) {
           try {
             const detail = await myApi.getEventQueue(eventId);
-            this.eventDetailsMap[eventId] = detail;
+            this.eventDetailsMap[eventId] = detail[0];
           } catch (err) {
             console.error("Failed to fetch event detail:", err);
             this.notify({
@@ -248,15 +247,13 @@ export default {
       this.selectAll = false;
     },
     clearFilters() {
-      // Clear all filters
       Object.keys(this.filters).forEach(key => {
         this.filters[key] = '';
       });
-      this.search(); // Re-filter data with cleared filters
+      this.search();
     },
     notify(message, type) {
       this.notification.message = '';
-      // Small delay to re-trigger the watch
       this.$nextTick(() => {
         this.notification = { message, type };
       });
